@@ -388,7 +388,7 @@
       const stored = localStorage.getItem(STORAGE_KEY);
       if(!stored) return [];
       const parsed = JSON.parse(stored);
-      return Array.isArray(parsed) ? parsed.filter(item => item && typeof item === "object" && item.id && item.title && item.content !== undefined) : [];
+      return Array.isArray(parsed) ? parsed.filter(item => item && typeof item === "object" && item.id && item.id !== "demo-1" && item.title && item.content !== undefined) : [];
     }catch(error){
       console.error("No fue posible cargar las plantillas:", error);
       return [];
