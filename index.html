@@ -136,7 +136,7 @@ body.editing .new-template{display:grid}
     <div class="modal-header">
       <div class="modal-heading">
         <h2 id="modalTitle">Nueva plantilla</h2>
-        <p>Registra una respuesta para utilizarla durante la atención.</p>
+        <p>Escribe únicamente el texto que deseas copiar durante la atención.</p>
       </div>
       <button class="close" id="closeModal" type="button" aria-label="Cerrar">×</button>
     </div>
@@ -144,37 +144,12 @@ body.editing .new-template{display:grid}
       <div class="modal-body">
         <input type="hidden" id="templateId">
         <div class="field">
-          <label for="templateTitle">Nombre o referencia de la plantilla</label>
-          <input id="templateTitle" maxlength="100" placeholder="Ej. Seguimiento de ticket">
-        </div>
-        <div class="two-fields">
-          <div class="field">
-            <label for="templateCategory">Categoría</label>
-            <input id="templateCategory" list="categoryOptions" maxlength="50" placeholder="Ej. Trámites académicos">
-            <datalist id="categoryOptions"></datalist>
-          </div>
-          <div class="field">
-            <label for="templateChannel">Canal de atención</label>
-            <select id="templateChannel">
-              <option value="Todos">Todos los canales</option>
-              <option value="Llamada">Llamada</option>
-              <option value="WhatsApp">WhatsApp</option>
-              <option value="Correo">Correo electrónico</option>
-              <option value="Presencial">Presencial</option>
-            </select>
-          </div>
-        </div>
-        <div class="field">
-          <label for="templateContent">Texto que se copiará</label>
-          <textarea id="templateContent" required placeholder="Escribe aquí el speech o respuesta completa..."></textarea>
-        </div>
-        <div class="field">
-          <div class="color-label"><label style="margin:0">Color de la tarjeta</label><span class="hint" id="selectedColorName">Azul</span></div>
-          <div class="palette" id="colorPalette"></div>
+          <label for="templateContent">Texto que deseas copiar</label>
+          <textarea id="templateContent" required autofocus placeholder="Escribe aquí el texto completo que utilizarás durante la atención..."></textarea>
         </div>
       </div>
       <div class="modal-footer">
-        <span class="hint">El texto se copiará exactamente como lo registres.</span>
+        <span class="hint">El texto se copiará exactamente como lo escribas.</span>
         <div class="footer-actions">
           <button class="modal-btn" id="cancelBtn" type="button">Cancelar</button>
           <button class="modal-btn primary" type="submit">Guardar plantilla</button>
@@ -262,30 +237,15 @@ body.editing .new-template{display:grid}
     const color = colors.find(item => item.id === id);
     return color ? color.name : "Azul";
   }
-  function renderPalette(){
-    $("colorPalette").innerHTML = colors.map(color =>
-      '<button type="button" class="swatch '+(selectedColor===color.id?"selected":"")+'" data-color="'+color.id+'" title="'+color.name+'" aria-label="Color '+color.name+'" style="background:'+color.bg+'"></button>'
-    ).join("");
-    $("selectedColorName").textContent = colorName(selectedColor);
-  }
-  function categories(){
-    return [...new Set(templates.map(item => item.category.trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"));
-  }
-  function renderCategoryOptions(){
-    $("categoryOptions").innerHTML = categories().map(category=>'<option value="'+escapeHtml(category)+'"></option>').join("");
-  }
   function cardHtml(item){
-    const category = item.category ? '<span class="card-category">'+escapeHtml(item.category)+'</span>' : "";
-    const label = item.title ? '<div class="card-label">'+escapeHtml(item.title)+'</div>' : "";
     const tools = '<div class="card-actions">'+
       '<button class="card-tool" type="button" data-action="edit" data-id="'+escapeHtml(item.id)+'" title="Editar">✎</button>'+
       '<button class="card-tool" type="button" data-action="delete" data-id="'+escapeHtml(item.id)+'" title="Eliminar">×</button>'+
     '</div>';
-    return '<article class="card '+escapeHtml(item.color)+'" data-id="'+escapeHtml(item.id)+'" draggable="'+(editing?"true":"false")+'" tabindex="0" role="button" aria-label="'+(editing?"Editar ":"Copiar ")+escapeHtml(item.title || item.content.slice(0,60))+'">'+
-      label+'<div class="card-content">'+escapeHtml(item.content)+'</div>'+category+tools+'</article>';
+    return '<article class="card '+escapeHtml(item.color)+'" data-id="'+escapeHtml(item.id)+'" draggable="'+(editing?"true":"false")+'" tabindex="0" role="button" aria-label="'+(editing?"Editar plantilla":"Copiar texto")+'">'+
+      '<div class="card-content">'+escapeHtml(item.content)+'</div>'+tools+'</article>';
   }
   function render(){
-    renderCategoryOptions();
     const query = $("searchInput").value.trim().toLocaleLowerCase("es");
     const filtered = templates.filter(item => {
       if(!query) return true;
@@ -313,12 +273,8 @@ body.editing .new-template{display:grid}
     $("templateForm").reset();
     $("templateId").value = item ? item.id : "";
     $("modalTitle").textContent = item ? "Editar plantilla" : "Nueva plantilla";
-    $("templateTitle").value = item ? item.title : "";
-    $("templateCategory").value = item ? item.category : "";
-    $("templateChannel").value = item ? item.channel || "Todos" : "Todos";
     $("templateContent").value = item ? item.content : "";
-    selectedColor = item ? item.color : "c-blue";
-    renderPalette();
+    selectedColor = item ? item.color : colors[templates.length % colors.length].id;
     $("editorOverlay").classList.add("open");
     setTimeout(()=>$("templateTitle").focus(),30);
   }
@@ -354,11 +310,6 @@ body.editing .new-template{display:grid}
   $("closeModal").addEventListener("click",closeEditor);
   $("cancelBtn").addEventListener("click",closeEditor);
   $("editorOverlay").addEventListener("click",event=>{if(event.target===$("editorOverlay"))closeEditor();});
-  $("colorPalette").addEventListener("click",event=>{
-    const button=event.target.closest("[data-color]");
-    if(!button)return;
-    selectedColor=button.dataset.color;renderPalette();
-  });
   $("templateForm").addEventListener("submit",event=>{
     event.preventDefault();
     if(!editing){showToast("Activa el modo de edición para modificar plantillas.");return;}
@@ -369,11 +320,11 @@ body.editing .new-template{display:grid}
     const now=Date.now();
     const item={
       id:previous?previous.id:(crypto.randomUUID?crypto.randomUUID():"tpl-"+now+"-"+Math.random().toString(36).slice(2)),
-      title:$("templateTitle").value.trim(),
-      category:$("templateCategory").value.trim(),
-      channel:$("templateChannel").value,
+      title:previous ? previous.title : "",
+      category:previous ? previous.category : "",
+      channel:previous ? previous.channel : "Todos",
       content,
-      color:selectedColor,
+      color:previous ? previous.color : selectedColor,
       favorite:previous?previous.favorite:false,
       createdAt:previous?previous.createdAt:now,
       updatedAt:now
