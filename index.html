@@ -36,6 +36,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 .btn-icon{width:48px;padding:0;background:#65717b;color:#fff;font-size:16px;box-shadow:0 2px 5px #27364020}
 .btn-save{background:#fff;color:#3e4b55;border-color:#dce2e8;box-shadow:0 2px 4px #2035430d}
 .btn-save:hover{background:#f8fafb}
+.btn-auth{background:#e9f7f4;color:#117f72;border-color:#d3eee8}
+.btn-auth:hover{background:#ddf2ed}
+.btn-auth.connected{background:#edf8f1;color:#247b4b;border-color:#d8efdf}
 .btn-lock{background:linear-gradient(135deg,#2789bd,#176b9e);color:#fff;box-shadow:0 3px 8px #1774a533;min-width:112px}
 .btn-lock.editing{background:linear-gradient(135deg,#e99b36,#d77820);box-shadow:0 3px 8px #d7782033}
 .btn-new{display:none;background:#1f9a83;color:#fff}
@@ -127,9 +130,10 @@ body.editing .new-template{display:grid}
     <span class="search-tip">Ctrl + F / ESC</span>
   </div>
   <div class="spacer"></div>
-  <div class="status" title="Estado del almacenamiento en este navegador"><span class="led saved" id="statusLed"></span><span id="statusLabel">Guardado</span></div>
+  <div class="status" title="Estado de sincronización con Firebase"><span class="led pending" id="statusLed"></span><span id="statusLabel">Solo local</span></div>
+  <button class="btn btn-auth" id="authBtn" type="button">Conectar nube</button>
   <button class="btn btn-icon" id="backupBtn" type="button" title="Descargar copia de seguridad" aria-label="Descargar copia de seguridad">💾</button>
-  <button class="btn btn-save" id="saveBtn" type="button">☁ Guardar</button>
+  <button class="btn btn-save" id="saveBtn" type="button">☁ Guardar nube</button>
   <button class="btn btn-lock" id="editBtn" type="button">Bloqueado</button>
   <button class="btn btn-new" id="newBtn" type="button">＋ Nueva plantilla</button>
 </header>
@@ -232,8 +236,15 @@ body.editing .new-template{display:grid}
   function saveData(showMessage){
     try{
       localStorage.setItem(STORAGE_KEY,JSON.stringify(templates));
-      setStatus("saved","Guardado");
-      if(showMessage) showToast("Cambios guardados en este navegador.");
+      const cloud = window.UCALFirebaseSync;
+      if(cloud && cloud.isConnected()){
+        setStatus("pending","Sincronizando...");
+        cloud.queueSave(templates);
+        if(showMessage) showToast("Guardado localmente. Sincronizando con Firebase...");
+      }else{
+        setStatus("pending","Solo local");
+        if(showMessage) showToast("Guardado en este navegador. Conecta Firebase para sincronizar.");
+      }
       return true;
     }catch(error){
       setStatus("error","Error al guardar");
@@ -336,7 +347,21 @@ body.editing .new-template{display:grid}
   });
   $("editBtn").addEventListener("click",()=>setEditing(!editing));
   $("newBtn").addEventListener("click",()=>{if(editing)openEditor();});
-  $("saveBtn").addEventListener("click",()=>saveData(true));
+  $("saveBtn").addEventListener("click",async()=>{
+    if(window.UCALFirebaseSync && window.UCALFirebaseSync.isConfigured()){
+      await window.UCALFirebaseSync.saveNow();
+    }else{
+      saveData(true);
+      showToast("Primero conecta Firebase para guardar en la nube.");
+    }
+  });
+  $("authBtn").addEventListener("click",async()=>{
+    if(window.UCALFirebaseSync){
+      await window.UCALFirebaseSync.connect();
+    }else{
+      showToast("Firebase aún se está inicializando.");
+    }
+  });
   $("backupBtn").addEventListener("click",downloadBackup);
   $("searchInput").addEventListener("input",render);
   $("closeModal").addEventListener("click",closeEditor);
@@ -484,9 +509,238 @@ body.editing .new-template{display:grid}
       else{$("searchInput").value="";render();}
     }
   });
+  window.UCALApp = {
+    getTemplates: () => templates.map(item => ({...item})),
+    replaceTemplates: items => {
+      if(!Array.isArray(items)) return;
+      templates = items.filter(item => item && item.id && item.content !== undefined).map((item,index) => ({
+        id:String(item.id),title:String(item.title || ""),category:String(item.category || ""),
+        channel:String(item.channel || "Todos"),content:String(item.content || ""),
+        color:colors.some(color => color.id === item.color) ? item.color : colors[index % colors.length].id,
+        favorite:!!item.favorite,createdAt:Number(item.createdAt) || Date.now(),
+        updatedAt:Number(item.updatedAt) || Number(item.createdAt) || Date.now()
+      }));
+      try{localStorage.setItem(STORAGE_KEY,JSON.stringify(templates));}catch(error){console.error(error);}
+      render();
+    },
+    setStatus,
+    notify: showToast
+  };
   render();
-  setStatus("saved","Guardado");
+  setStatus("pending","Solo local");
 })();
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "REEMPLAZAR_API_KEY",
+  authDomain: "REEMPLAZAR_PROJECT_ID.firebaseapp.com",
+  projectId: "REEMPLAZAR_PROJECT_ID",
+  appId: "REEMPLAZAR_APP_ID"
+};
+
+const $ = id => document.getElementById(id);
+const appBridge = window.UCALApp;
+const ownerStorageKey = "ucal_attention_firebase_owner_v1";
+const configured = firebaseConfig.apiKey !== "REEMPLAZAR_API_KEY" &&
+  firebaseConfig.projectId !== "REEMPLAZAR_PROJECT_ID" &&
+  firebaseConfig.appId !== "REEMPLAZAR_APP_ID";
+
+let auth = null;
+let db = null;
+let currentUser = null;
+let currentRef = null;
+let unsubscribeSnapshot = null;
+let ready = false;
+let writing = false;
+let writeTimer = null;
+let queuedItems = null;
+
+function setStatus(state,label){
+  if(appBridge) appBridge.setStatus(state,label);
+}
+function notify(message){
+  if(appBridge) appBridge.notify(message);
+}
+function cleanItems(items){
+  return (Array.isArray(items) ? items : []).filter(item => item && item.id && item.content !== undefined).map(item => ({
+    id:String(item.id),title:String(item.title || ""),category:String(item.category || ""),
+    channel:String(item.channel || "Todos"),content:String(item.content || ""),
+    color:String(item.color || "c-blue"),favorite:!!item.favorite,
+    createdAt:Number(item.createdAt) || Date.now(),updatedAt:Number(item.updatedAt) || Number(item.createdAt) || Date.now()
+  }));
+}
+function sameItems(a,b){
+  return JSON.stringify(cleanItems(a)) === JSON.stringify(cleanItems(b));
+}
+function mergeInitial(remoteItems,localItems){
+  const merged = cleanItems(remoteItems);
+  const positions = new Map(merged.map((item,index)=>[item.id,index]));
+  cleanItems(localItems).forEach(localItem=>{
+    if(!positions.has(localItem.id)){
+      positions.set(localItem.id,merged.length);
+      merged.push(localItem);
+      return;
+    }
+    const index=positions.get(localItem.id);
+    if((localItem.updatedAt || 0) > (merged[index].updatedAt || 0)) merged[index]=localItem;
+  });
+  return merged;
+}
+async function writeItems(items){
+  if(!currentUser || !currentRef || !ready) return false;
+  const payload=cleanItems(items);
+  writing=true;
+  setStatus("pending","Sincronizando...");
+  try{
+    await setDoc(currentRef,{items:payload,updatedAt:serverTimestamp()},{merge:true});
+    setStatus("saved","Sincronizado");
+    return true;
+  }catch(error){
+    console.error("Error al guardar en Firebase:",error);
+    setStatus("error","Error de Firebase");
+    notify("No se pudo sincronizar. Tus cambios siguen guardados localmente.");
+    return false;
+  }finally{
+    writing=false;
+    const latest=appBridge.getTemplates();
+    if(!sameItems(latest,payload) && ready) queueSave(latest);
+  }
+}
+function queueSave(items){
+  if(!ready || !currentUser) return;
+  queuedItems=cleanItems(items);
+  setStatus("pending","Pendiente...");
+  clearTimeout(writeTimer);
+  writeTimer=setTimeout(()=>{
+    const toWrite=queuedItems;
+    queuedItems=null;
+    writeItems(toWrite);
+  },450);
+}
+async function saveNow(){
+  if(!configured){notify("Falta configurar Firebase. Revisa el archivo FIREBASE_SETUP.md.");return false;}
+  if(!currentUser){notify("Conecta tu cuenta de Google antes de guardar en Firebase.");return false;}
+  if(!ready){notify("Firebase todavía está preparando la sincronización.");return false;}
+  clearTimeout(writeTimer);
+  const items=queuedItems || appBridge.getTemplates();
+  queuedItems=null;
+  const ok=await writeItems(items);
+  if(ok) notify("Plantillas guardadas en Firebase.");
+  return ok;
+}
+async function initializeUser(user){
+  if(unsubscribeSnapshot){unsubscribeSnapshot();unsubscribeSnapshot=null;}
+  clearTimeout(writeTimer);
+  ready=false;
+  currentUser=user;
+  currentRef=doc(db,"users",user.uid,"workspaces","ucalTemplates");
+  setStatus("pending","Conectando...");
+  try{
+    const snapshot=await getDoc(currentRef);
+    const localItems=appBridge.getTemplates();
+    const storedOwner=localStorage.getItem(ownerStorageKey);
+    const canMigrateLocal=!storedOwner || storedOwner===user.uid;
+    let items;
+    if(snapshot.exists()){
+      const remoteItems=cleanItems(snapshot.data().items);
+      items=canMigrateLocal ? mergeInitial(remoteItems,localItems) : remoteItems;
+      appBridge.replaceTemplates(items);
+      localStorage.setItem(ownerStorageKey,user.uid);
+      ready=true;
+      if(!sameItems(items,remoteItems)) await writeItems(items);
+    }else{
+      items=canMigrateLocal ? localItems : [];
+      appBridge.replaceTemplates(items);
+      localStorage.setItem(ownerStorageKey,user.uid);
+      ready=true;
+      await writeItems(items);
+    }
+    unsubscribeSnapshot=onSnapshot(currentRef,remoteSnapshot=>{
+      if(!remoteSnapshot.exists() || writing || !ready) return;
+      const remoteItems=cleanItems(remoteSnapshot.data().items);
+      const localNow=appBridge.getTemplates();
+      if(!sameItems(remoteItems,localNow)) appBridge.replaceTemplates(remoteItems);
+      setStatus("saved","Sincronizado");
+    },error=>{
+      console.error("Error escuchando cambios de Firebase:",error);
+      setStatus("error","Sin conexión");
+      notify("Se perdió la conexión con Firebase. Los cambios locales se conservan.");
+    });
+    setStatus("saved","Sincronizado");
+    $("authBtn").textContent="Desconectar";
+    $("authBtn").classList.add("connected");
+    $("authBtn").title=user.email || "Cuenta conectada";
+    notify("Firebase conectado. Tus plantillas están sincronizadas.");
+  }catch(error){
+    console.error("No fue posible iniciar la sincronización:",error);
+    ready=false;
+    setStatus("error","Error de conexión");
+    notify("No se pudo conectar con Firebase. Revisa Authentication, Firestore y las reglas de seguridad.");
+  }
+}
+async function connect(){
+  if(!configured){notify("Falta pegar la configuración de tu aplicación web Firebase en index.html.");return;}
+  if(currentUser){
+    if(!confirm("¿Deseas desconectar tu cuenta de Firebase? Tus plantillas permanecerán guardadas en la nube.")) return;
+    try{await signOut(auth);}catch(error){console.error(error);notify("No se pudo cerrar la sesión.");}
+    return;
+  }
+  try{
+    const provider=new GoogleAuthProvider();
+    provider.setCustomParameters({prompt:"select_account"});
+    setStatus("pending","Abriendo Google...");
+    await signInWithPopup(auth,provider);
+  }catch(error){
+    console.error("Error de autenticación:",error);
+    setStatus("error","Error de acceso");
+    if(error.code==="auth/unauthorized-domain") notify("Autoriza el dominio de GitHub Pages en Firebase Authentication.");
+    else if(error.code==="auth/popup-blocked") notify("Permite las ventanas emergentes para iniciar sesión.");
+    else notify("No se pudo iniciar sesión con Google. Verifica que el proveedor esté habilitado.");
+  }
+}
+window.UCALFirebaseSync={
+  isConfigured:()=>configured,
+  isConnected:()=>!!currentUser && ready,
+  queueSave,
+  saveNow,
+  connect
+};
+
+if(!configured){
+  setStatus("pending","Configurar Firebase");
+  $("authBtn").textContent="Configurar nube";
+  $("authBtn").addEventListener("click",()=>notify("Registra tu app web en Firebase y pega el objeto firebaseConfig. Consulta FIREBASE_SETUP.md."));
+  $("saveBtn").addEventListener("click",()=>notify("Primero configura Firebase y conecta tu cuenta de Google."));
+}else{
+  try{
+    const firebaseApp=initializeApp(firebaseConfig);
+    auth=getAuth(firebaseApp);
+    db=getFirestore(firebaseApp);
+    onAuthStateChanged(auth,user=>{
+      if(user) initializeUser(user);
+      else{
+        if(unsubscribeSnapshot){unsubscribeSnapshot();unsubscribeSnapshot=null;}
+        ready=false;currentUser=null;currentRef=null;
+        $("authBtn").textContent="Conectar nube";
+        $("authBtn").classList.remove("connected");
+        $("authBtn").title="Iniciar sesión con Google";
+        setStatus("pending","Solo local");
+      }
+    });
+  }catch(error){
+    console.error("Error inicializando Firebase:",error);
+    setStatus("error","Config. incorrecta");
+    notify("La configuración de Firebase no es válida. Revisa firebaseConfig.");
+  }
+}
+window.addEventListener("online",()=>{
+  if(currentUser && ready) queueSave(appBridge.getTemplates());
+});
 </script>
 </body>
 </html>
