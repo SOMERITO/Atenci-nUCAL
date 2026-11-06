@@ -714,8 +714,7 @@ window.UCALFirebaseSync={
 if(!configured){
   setStatus("pending","Configurar Firebase");
   $("authBtn").textContent="Configurar nube";
-  $("authBtn").addEventListener("click",()=>notify("Registra tu app web en Firebase y pega el objeto firebaseConfig. Consulta FIREBASE_SETUP.md."));
-  $("saveBtn").addEventListener("click",()=>notify("Primero configura Firebase y conecta tu cuenta de Google."));
+  $("authBtn").title="Configura primero los datos de tu proyecto Firebase";
 }else{
   try{
     const firebaseApp=initializeApp(firebaseConfig);
