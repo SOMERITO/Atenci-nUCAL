@@ -1,329 +1,161 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#202b32">
-  <meta name="description" content="Centro personal de plantillas para la atención al estudiante UCAL.">
-  <title>UCAL | Centro de atención</title>
-  <style>
-    :root{
-      color-scheme:light;
-      --brand:#12ae99;--brand-dark:#0c8d7c;--brand-soft:#e7f7f4;
-      --ink:#263238;--muted:#77858b;--muted-2:#9aa6aa;
-      --bg:#f5f7f7;--surface:#fff;--line:#e7eceb;--line-strong:#d7e0de;
-      --nav:#202b32;--nav-hover:#2a373e;--nav-muted:#a8b5b6;
-      --shadow:0 10px 30px rgba(30,55,57,.055);--shadow-hover:0 16px 38px rgba(30,55,57,.10);
-      --radius:16px;
-    }
-    *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;-webkit-font-smoothing:antialiased}
-    button,input,textarea,select{font:inherit}
-    button{cursor:pointer}
-    button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid rgba(18,174,153,.25);outline-offset:2px}
-    .app{min-height:100vh;display:grid;grid-template-columns:258px minmax(0,1fr)}
-    .sidebar{background:var(--nav);color:#fff;padding:25px 17px 18px;display:flex;flex-direction:column;min-height:100vh;position:sticky;top:0;height:100vh}
-    .brand{display:flex;align-items:center;gap:11px;padding:2px 10px 29px}
-    .brand-mark{width:39px;height:39px;border-radius:12px;background:var(--brand);display:grid;place-items:center;font-size:13px;font-weight:900;letter-spacing:-.5px;color:#fff;box-shadow:0 5px 16px #12ae9940}
-    .brand-name{font-weight:850;letter-spacing:1.6px;font-size:17px;line-height:1.1}
-    .brand-sub{display:block;font-size:9px;letter-spacing:1.35px;color:#aab8b8;margin-top:5px;font-weight:700}
-    .side-label{font-size:10px;letter-spacing:1.3px;color:#829194;font-weight:800;text-transform:uppercase;padding:0 11px;margin:9px 0 9px}
-    .nav{display:grid;gap:4px}
-    .nav-btn{width:100%;border:0;background:transparent;color:var(--nav-muted);display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;text-align:left;font-size:13px;font-weight:650;transition:background .18s,color .18s}
-    .nav-btn:hover{background:var(--nav-hover);color:#fff}
-    .nav-btn.active{background:#30443f;color:#fff;box-shadow:inset 3px 0 0 var(--brand)}
-    .nav-btn .icon{width:18px;height:18px;opacity:.9}
-    .nav-count{margin-left:auto;font-size:11px;color:#a9b7b6;background:#ffffff12;padding:3px 7px;border-radius:20px}
-    .nav-btn.active .nav-count{background:#12ae9928;color:#b8f4e9}
-    .side-divider{height:1px;background:#ffffff18;margin:22px 7px 16px}
-    .category-list{display:grid;gap:3px;overflow:auto;max-height:40vh;padding-right:2px}
-    .category-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 11px;border:0;border-radius:9px;background:transparent;color:#aebbbb;text-align:left;font-size:12px}
-    .category-btn:hover,.category-btn.active{background:var(--nav-hover);color:#fff}
-    .category-dot{width:7px;height:7px;border-radius:50%;background:var(--brand);flex:0 0 auto}
-    .category-count{margin-left:auto;font-size:10px;color:#839394}
-    .side-spacer{flex:1}
-    .storage-note{background:#ffffff0d;border:1px solid #ffffff12;border-radius:12px;padding:12px;margin:18px 3px 0}
-    .storage-title{font-size:11px;font-weight:750;display:flex;align-items:center;gap:7px;color:#e5eeee}
-    .storage-note p{font-size:10px;color:#9eafae;line-height:1.5;margin:7px 0 0}
-    .side-footer{padding:17px 9px 0;color:#718181;font-size:10px;letter-spacing:.2px}
-    .workspace{min-width:0;display:flex;flex-direction:column}
-    .topbar{height:74px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:18px;padding:0 34px;position:sticky;top:0;z-index:5}
-    .crumb{font-size:12px;color:var(--muted);white-space:nowrap}
-    .crumb strong{color:var(--ink);font-weight:700}
-    .topbar-spacer{flex:1}
-    .search-wrap{position:relative;width:min(360px,40vw)}
-    .search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:#91a09e;pointer-events:none}
-    .search{width:100%;border:1px solid var(--line);background:#f8faf9;border-radius:10px;padding:10px 66px 10px 39px;font-size:12px;color:var(--ink);transition:.2s}
-    .search::placeholder{color:#9aa6a4}
-    .search:focus{background:#fff;border-color:#a8dcd3;outline:none;box-shadow:0 0 0 3px #12ae9915}
-    .shortcut{position:absolute;right:10px;top:50%;transform:translateY(-50%);border:1px solid var(--line);border-radius:5px;padding:2px 5px;color:#9aa6a4;font-size:9px;background:#fff}
-    .topbar-action{border:0;background:var(--brand);color:white;font-weight:750;font-size:12px;padding:10px 14px;border-radius:9px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 10px #12ae992a;transition:.18s;white-space:nowrap}
-    .topbar-action:hover{background:var(--brand-dark);transform:translateY(-1px)}
-    .avatar{width:33px;height:33px;border-radius:50%;background:#e6f5f2;color:#188d7e;display:grid;place-items:center;font-weight:850;font-size:11px;border:1px solid #d5efea}
-    .main{width:100%;max-width:1500px;margin:0 auto;padding:32px 34px 48px}
-    .page-heading{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin-bottom:25px}
-    .eyebrow{font-size:10px;color:var(--brand-dark);font-weight:850;letter-spacing:1.4px;text-transform:uppercase;margin-bottom:8px}
-    h1{font-size:27px;letter-spacing:-.8px;line-height:1.18;margin:0;color:#263238;font-weight:780}
-    .subtitle{margin:8px 0 0;color:var(--muted);font-size:13px;line-height:1.55}
-    .heading-actions{display:flex;align-items:center;gap:9px}
-    .button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line-strong);background:#fff;color:#425157;border-radius:9px;padding:9px 12px;font-size:11px;font-weight:750;transition:.18s}
-    .button:hover{border-color:#b7d9d3;background:#fbfefd;transform:translateY(-1px)}
-    .button-primary{background:var(--brand);border-color:var(--brand);color:white;box-shadow:0 5px 13px #12ae9922}
-    .button-primary:hover{background:var(--brand-dark);border-color:var(--brand-dark);color:#fff}
-    .button-soft{background:var(--brand-soft);border-color:transparent;color:#117f72}
-    .button-soft:hover{background:#d9f1ec;border-color:transparent}
-    .button-danger{color:#bd4f4b;background:#fff8f7;border-color:#f4e0de}
-    .button .icon{width:15px;height:15px}
-    .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:25px}
-    .stat-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:17px 19px;display:flex;gap:14px;align-items:center;box-shadow:0 3px 14px #293b3b05}
-    .stat-icon{width:39px;height:39px;border-radius:11px;display:grid;place-items:center;background:#e8f7f4;color:#169887;flex:0 0 auto}
-    .stat-icon.blue{background:#edf5fa;color:#5795b2}.stat-icon.gold{background:#faf4e7;color:#bd9651}
-    .stat-icon svg{width:19px;height:19px}
-    .stat-number{font-size:23px;line-height:1.1;font-weight:800;letter-spacing:-.5px;color:#26383d}
-    .stat-label{font-size:11px;color:var(--muted);margin-top:5px}
-    .library-panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-    .library-toolbar{padding:18px 21px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-    .section-title{font-size:14px;font-weight:800;color:#304047;letter-spacing:-.2px}
-    .section-meta{font-size:11px;color:var(--muted);margin-left:8px;font-weight:500}
-    .toolbar-spacer{flex:1}
-    .select{border:1px solid var(--line);border-radius:8px;background:#fff;padding:8px 28px 8px 10px;color:#536369;font-size:11px;max-width:190px}
-    .view-toggle{display:flex;border:1px solid var(--line);padding:3px;border-radius:8px;gap:2px}
-    .view-toggle button{border:0;background:transparent;color:#8a9998;border-radius:5px;padding:5px 7px;display:grid;place-items:center}
-    .view-toggle button.active{background:#e9f6f3;color:#138e7e}
-    .view-toggle svg{width:15px;height:15px}
-    .template-grid{padding:20px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-    .template-grid.list-view{grid-template-columns:1fr}
-    .template-card{min-width:0;border:1px solid var(--line);border-radius:13px;padding:16px;background:#fff;display:flex;flex-direction:column;min-height:208px;transition:transform .18s,border .18s,box-shadow .18s}
-    .template-card:hover{border-color:#c8e5df;box-shadow:var(--shadow-hover);transform:translateY(-2px)}
-    .card-head{display:flex;align-items:flex-start;gap:10px}
-    .template-mark{width:34px;height:34px;border-radius:10px;background:#eaf7f4;color:#169887;display:grid;place-items:center;flex:0 0 auto}
-    .template-mark svg{width:17px;height:17px}
-    .card-heading{min-width:0;flex:1}
-    .card-title{margin:1px 0 5px;font-size:13px;line-height:1.35;font-weight:780;color:#314147;overflow-wrap:anywhere}
-    .card-category{font-size:10px;color:#84918f}
-    .favorite-btn{border:0;background:transparent;color:#b9c2c0;padding:3px;line-height:0;border-radius:6px}
-    .favorite-btn:hover,.favorite-btn.is-favorite{color:#d49a39;background:#fff8e9}
-    .favorite-btn svg{width:16px;height:16px}
-    .card-channel{margin:15px 0 10px;display:flex;align-items:center;gap:6px;font-size:9px;font-weight:750;color:#627471}
-    .channel-pill{border-radius:30px;background:#f1f5f4;padding:4px 8px;color:#6c7b78}
-    .card-preview{margin:0;color:#71807f;font-size:11px;line-height:1.65;white-space:pre-wrap;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;min-height:54px;flex:1;overflow-wrap:anywhere}
-    .card-footer{border-top:1px solid #eef1f0;margin-top:13px;padding-top:11px;display:flex;align-items:center;justify-content:space-between;gap:7px}
-    .updated{font-size:9px;color:#9aa5a3;white-space:nowrap}
-    .card-actions{display:flex;gap:5px}
-    .icon-action{border:1px solid transparent;border-radius:7px;background:transparent;color:#7a8987;padding:6px;display:grid;place-items:center}
-    .icon-action:hover{background:#f0f7f5;color:#168c7d}
-    .icon-action.copy-action{background:#eaf7f4;color:#138b7b;padding:6px 9px;display:flex;gap:5px;font-size:10px;font-weight:800}
-    .icon-action svg{width:14px;height:14px}
-    .template-grid.list-view .template-card{min-height:0;display:grid;grid-template-columns:minmax(190px,1fr) 130px minmax(200px,2fr) auto;align-items:center;gap:18px;padding:13px 16px}
-    .template-grid.list-view .card-head{align-items:center}
-    .template-grid.list-view .card-channel{margin:0}
-    .template-grid.list-view .card-preview{min-height:0;-webkit-line-clamp:2}
-    .template-grid.list-view .card-footer{border:0;padding:0;margin:0;justify-content:flex-end}
-    .template-grid.list-view .updated{display:none}
-    .empty-state{grid-column:1/-1;padding:58px 20px;text-align:center}
-    .empty-icon{width:54px;height:54px;border-radius:16px;background:#eaf7f4;color:#159987;margin:0 auto 14px;display:grid;place-items:center}
-    .empty-icon svg{width:24px;height:24px}
-    .empty-state h3{font-size:15px;margin:0;color:#34454a}
-    .empty-state p{font-size:12px;color:#879491;margin:7px 0 18px}
-    .empty-state .button{margin:auto}
-    .bottom-note{padding:12px 20px;border-top:1px solid var(--line);background:#fbfcfc;color:#94a09e;font-size:10px;display:flex;align-items:center;gap:7px}
-    .bottom-note svg{width:13px;height:13px;color:#12ae99}
-    .overlay{position:fixed;inset:0;background:rgba(25,39,43,.48);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:18px;z-index:20}
-    .overlay.open{display:flex}
-    .modal{width:min(650px,100%);max-height:min(92vh,850px);overflow:auto;background:#fff;border-radius:17px;box-shadow:0 24px 80px #142b2d45;animation:modalIn .18s ease-out}
-    @keyframes modalIn{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
-    .modal-head{padding:22px 24px 17px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:15px}
-    .modal-head-copy{flex:1}
-    .modal-title{font-size:17px;margin:0;color:#2c3b40;font-weight:800}
-    .modal-subtitle{font-size:11px;color:#85928f;margin:6px 0 0;line-height:1.5}
-    .modal-close{border:0;background:#f3f6f5;color:#71817e;width:30px;height:30px;border-radius:8px;display:grid;place-items:center}
-    .modal-close:hover{background:#e8efed;color:#344a49}
-    .modal-close svg{width:16px;height:16px}
-    .modal-body{padding:20px 24px 23px}
-    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .field{margin-bottom:15px}
-    .field:last-child{margin-bottom:0}
-    .field label{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:780;color:#52615f;margin:0 0 7px}
-    .required{color:#d06c64}
-    .field input,.field textarea,.field select{display:block;width:100%;border:1px solid #dce5e2;border-radius:9px;padding:10px 11px;background:#fff;color:#344448;font-size:12px;transition:.18s}
-    .field input::placeholder,.field textarea::placeholder{color:#aab5b2}
-    .field input:focus,.field textarea:focus,.field select:focus{outline:0;border-color:#78c8bb;box-shadow:0 0 0 3px #12ae9915}
-    .field textarea{min-height:190px;line-height:1.65;resize:vertical}
-    .field-help{font-size:10px;color:#9aa6a3;margin-top:6px;line-height:1.45}
-    .modal-footer{padding:14px 24px 19px;background:#fbfcfc;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .footer-hint{color:#99a5a2;font-size:10px}
-    .footer-actions{display:flex;gap:8px}
-    .view-text{white-space:pre-wrap;background:#f8faf9;border:1px solid var(--line);border-radius:10px;padding:16px;color:#465653;font-size:12px;line-height:1.7;max-height:52vh;overflow:auto}
-    .toast{position:fixed;left:50%;bottom:25px;transform:translate(-50%,12px);background:#26383b;color:#fff;padding:11px 16px;border-radius:9px;font-size:11px;font-weight:700;box-shadow:0 8px 22px #1c323333;opacity:0;pointer-events:none;transition:.22s;z-index:40}
-    .toast.show{opacity:1;transform:translate(-50%,0)}
-    .mobile-brand{display:none}
-    @media(max-width:1180px){.template-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.main{padding:27px 25px 40px}.topbar{padding:0 25px}}
-    @media(max-width:900px){
-      .app{grid-template-columns:1fr}.sidebar{position:relative;height:auto;min-height:0;padding:12px 16px;display:block}
-      .brand{padding:2px 5px 11px}.brand-mark{width:33px;height:33px}.brand-name{font-size:15px}
-      .side-label,.categories,.side-divider,.storage-note,.side-footer,.side-spacer{display:none}
-      .nav{display:flex;gap:5px;overflow-x:auto;padding:2px 0 3px}.nav-btn{width:auto;white-space:nowrap;padding:9px 11px;font-size:11px}
-      .nav-btn .icon{width:15px;height:15px}
-      .nav-count{margin-left:2px}
-      .topbar{height:62px}
-    }
-    @media(max-width:620px){
-      .topbar{padding:0 15px;gap:9px}.crumb{display:none}.search-wrap{width:100%;flex:1}.topbar-action{padding:9px 10px;font-size:0}.topbar-action .icon{width:17px;height:17px}.avatar{display:none}
-      .main{padding:22px 13px 34px}.page-heading{align-items:flex-start;flex-direction:column;margin-bottom:18px}h1{font-size:23px}.subtitle{font-size:12px}.heading-actions{width:100%}.heading-actions .button{flex:1}
-      .stats{gap:7px;margin-bottom:16px}.stat-card{padding:11px 9px;gap:7px;align-items:flex-start;flex-direction:column}.stat-icon{width:29px;height:29px;border-radius:8px}.stat-icon svg{width:15px;height:15px}.stat-number{font-size:20px}.stat-label{font-size:9px;line-height:1.3}
-      .library-toolbar{padding:14px 13px;gap:8px}.section-title{font-size:12px}.section-meta{display:block;margin:3px 0 0}.toolbar-spacer{display:none}.select{flex:1;max-width:none;min-width:0}.view-toggle{display:none}
-      .template-grid{grid-template-columns:1fr;padding:12px;gap:10px}.template-card{min-height:190px}
-      .template-grid.list-view .template-card{display:flex;gap:0;align-items:stretch}.template-grid.list-view .card-channel{margin:12px 0 8px}.template-grid.list-view .card-preview{min-height:45px}.template-grid.list-view .card-footer{margin-top:10px;padding-top:9px;border-top:1px solid #eef1f0;justify-content:space-between}
-      .bottom-note{padding:11px 13px;line-height:1.4}
-      .form-grid{grid-template-columns:1fr;gap:0}.modal-head{padding:18px 18px 14px}.modal-body{padding:17px 18px}.modal-footer{padding:13px 18px}.field textarea{min-height:165px}.footer-hint{display:none}.footer-actions{width:100%}.footer-actions .button{flex:1}
-    }
-    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f0f2f5">
+<meta name="description" content="Biblioteca de respuestas y plantillas para la atención UCAL.">
+<title>UCAL PRO | Centro de atención</title>
+<style>
+:root{--bg:#eef1f5;--panel:#fff;--ink:#202a35;--muted:#7a8793;--line:#dfe5eb;--blue:#2581b8;--blue-dark:#176b9f;--green:#20b978;--orange:#ed9b32;--shadow:0 2px 5px rgba(22,39,55,.08),0 1px 2px rgba(22,39,55,.05);--radius:12px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;height:100vh;min-height:100vh;display:flex;flex-direction:column;overflow:hidden}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #2581b844;outline-offset:2px}
+.toolbar{height:64px;flex:0 0 64px;display:flex;align-items:center;gap:14px;padding:0 22px;background:#fff;border-bottom:1px solid #e0e5ea;box-shadow:0 2px 8px #1b33400a;z-index:5}
+.brand{font-size:17px;line-height:1;font-weight:950;letter-spacing:-.7px;color:#17232d;white-space:nowrap}
+.brand span{color:#2682b9}
+.search-wrap{position:relative;width:min(410px,34vw);margin-left:2px}
+.search-wrap input{width:100%;height:38px;border:1px solid #dce2e9;background:#f4f6f8;border-radius:22px;padding:0 112px 0 38px;font-size:12px;color:#263746;transition:.18s}
+.search-wrap input::placeholder{color:#7f8b98}
+.search-wrap input:focus{outline:0;border-color:#8bbbd6;background:#fff;box-shadow:0 0 0 3px #2581b814}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#8b99a5;font-size:16px;pointer-events:none}
+.search-tip{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#3988b8;font-size:10px;white-space:nowrap;pointer-events:none}
+.spacer{flex:1}
+.status{display:flex;align-items:center;gap:7px;border:1px solid #e7ecef;background:#fafbfc;border-radius:20px;padding:7px 12px;font-size:10px;color:#687783;white-space:nowrap}
+.led{width:9px;height:9px;border-radius:50%;background:#aab5bd}
+.led.saved{background:#20c77b;box-shadow:0 0 6px #20c77b77}
+.led.pending{background:#e99a32;box-shadow:0 0 6px #e99a3277}
+.led.error{background:#e35454;box-shadow:0 0 6px #e3545477}
+.btn{height:37px;border:1px solid transparent;border-radius:8px;padding:0 15px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:11px;font-weight:780;white-space:nowrap;transition:transform .16s,background .16s,box-shadow .16s}
+.btn:hover{transform:translateY(-1px)}
+.btn-icon{width:48px;padding:0;background:#65717b;color:#fff;font-size:16px;box-shadow:0 2px 5px #27364020}
+.btn-save{background:#fff;color:#3e4b55;border-color:#dce2e8;box-shadow:0 2px 4px #2035430d}
+.btn-save:hover{background:#f8fafb}
+.btn-lock{background:linear-gradient(135deg,#2789bd,#176b9e);color:#fff;box-shadow:0 3px 8px #1774a533;min-width:112px}
+.btn-lock.editing{background:linear-gradient(135deg,#e99b36,#d77820);box-shadow:0 3px 8px #d7782033}
+.btn-new{display:none;background:#1f9a83;color:#fff}
+body.editing .btn-new{display:inline-flex}
+main{flex:1;min-height:0;overflow:auto;padding:12px 18px 30px}
+.dashboard-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));grid-auto-rows:minmax(180px,auto);gap:13px}
+.card{position:relative;border-radius:var(--radius);padding:15px 15px 28px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,.7);cursor:pointer;transition:transform .18s,box-shadow .18s;user-select:text;overflow:hidden;min-width:0;min-height:180px;display:flex;flex-direction:column}
+.card:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(22,39,55,.13);z-index:2}
+.card:active{transform:translateY(0)}
+.card-label{font-size:10px;line-height:1.25;font-weight:850;letter-spacing:.15px;margin:0 0 7px;opacity:.72;text-transform:uppercase;overflow-wrap:anywhere}
+.card-content{font-size:11px;line-height:1.45;font-weight:650;white-space:pre-wrap;overflow-wrap:anywhere;flex:1}
+.card-category{position:absolute;bottom:9px;left:15px;font-size:9px;font-weight:700;opacity:.5;max-width:calc(100% - 72px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-actions{position:absolute;right:8px;bottom:6px;display:none;gap:4px;z-index:3}
+body.editing .card-actions{display:flex}
+.card-tool{width:24px;height:24px;border:0;border-radius:50%;background:#ffffffdd;color:#34434b;box-shadow:0 1px 4px #00000020;display:grid;place-items:center;font-size:12px}
+.card-tool:hover{background:#fff;transform:scale(1.08)}
+.card.dragging{opacity:.4;transform:scale(.98)}
+.card.drag-over{outline:2px dashed #2386b7;outline-offset:2px}
+.c-blue{background:linear-gradient(135deg,#e2f1ff,#bfdef9);color:#1457a3}
+.c-green{background:linear-gradient(135deg,#e8f7e9,#c8e7cb);color:#236b32}
+.c-purple{background:linear-gradient(135deg,#f2e4f6,#e2c6eb);color:#63309b}
+.c-orange{background:linear-gradient(135deg,#fff1d9,#ffe0b3);color:#c95b08}
+.c-red{background:linear-gradient(135deg,#ffedef,#ffd1d7);color:#c52d35}
+.c-gray{background:linear-gradient(135deg,#fff,#f0f2f4);color:#4a5d6a}
+.c-teal{background:linear-gradient(135deg,#e0f5f1,#b7e5dc);color:#087868}
+.c-pink{background:linear-gradient(135deg,#fce6ee,#f6c4d7);color:#a61d5a}
+.c-indigo{background:linear-gradient(135deg,#e9eafd,#cbd0f1);color:#343e91}
+.c-lime{background:linear-gradient(135deg,#f7fbe7,#deedc4);color:#5c7925}
+.c-amber{background:linear-gradient(135deg,#fff8e5,#ffe7a8);color:#93610c}
+.c-brown{background:linear-gradient(135deg,#f2ebe7,#d9c8bd);color:#644333}
+.c-dark{background:linear-gradient(135deg,#35444b,#20282c);color:#fff}
+.c-purple-dark{background:linear-gradient(135deg,#4d1d93,#31167e);color:#fff}
+.c-lavender{background:linear-gradient(135deg,#f0eafa,#d7c8ef);color:#573b91}
+.new-template{display:none;min-height:180px;border:2px dashed #b9c7cf;background:#f8fafb;border-radius:var(--radius);color:#758792;place-items:center;align-content:center;gap:9px;font-size:12px;font-weight:750;transition:.18s}
+body.editing .new-template{display:grid}
+.new-template:hover{background:#fff;border-color:#4c9cc3;color:#247eaa}
+.new-template .plus{font-size:27px;font-weight:300;line-height:1}
+.empty-state{grid-column:1/-1;min-height:380px;display:grid;place-content:center;text-align:center;color:#788893}
+.empty-state strong{font-size:16px;color:#40515c;margin-bottom:7px}
+.empty-state span{font-size:12px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,16px);background:#24333c;color:#fff;padding:11px 18px;border-radius:30px;font-size:11px;font-weight:700;box-shadow:0 8px 22px #20344133;opacity:0;pointer-events:none;transition:.22s;z-index:30}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.overlay{display:none;position:fixed;inset:0;z-index:20;background:#18283275;backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px}
+.overlay.open{display:flex}
+.modal{width:min(590px,100%);max-height:92vh;overflow:auto;background:#fff;border:1px solid #e1e7eb;border-radius:17px;box-shadow:0 20px 65px #132b3c40;animation:pop .2s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:none}}
+.modal-header{display:flex;align-items:flex-start;gap:12px;padding:21px 23px 16px;border-bottom:1px solid #edf0f2}
+.modal-heading{flex:1}
+.modal-header h2{font-size:17px;margin:0;color:#25343c}
+.modal-header p{font-size:11px;color:#85919a;margin:5px 0 0}
+.close{width:30px;height:30px;border:0;border-radius:8px;background:#f0f3f5;color:#64727b;font-size:17px}
+.modal-body{padding:19px 23px 22px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;font-weight:800;color:#52616a;margin-bottom:6px}
+.field input,.field textarea,.field select{width:100%;border:1px solid #dce3e8;border-radius:8px;padding:10px 11px;font-size:12px;color:#283943;background:#fff}
+.field input:focus,.field textarea:focus,.field select:focus{outline:0;border-color:#75afd0;box-shadow:0 0 0 3px #2684b71a}
+.field textarea{min-height:180px;resize:vertical;line-height:1.55}
+.two-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.color-label{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.palette{display:flex;flex-wrap:wrap;gap:9px;margin-top:9px}
+.swatch{width:27px;height:27px;border-radius:50%;border:2px solid #ffffff;box-shadow:0 0 0 1px #d3dce1;cursor:pointer;position:relative}
+.swatch.selected{box-shadow:0 0 0 2px #2585b8}
+.swatch.selected:after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#283943;font-size:13px;font-weight:900}
+.modal-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 23px 18px;border-top:1px solid #edf0f2;background:#fafbfc}
+.hint{font-size:10px;color:#8b989f}
+.footer-actions{display:flex;gap:8px}
+.modal-btn{height:35px;padding:0 14px;border-radius:8px;border:1px solid #dce3e8;background:#fff;color:#586873;font-size:11px;font-weight:750}
+.modal-btn.primary{background:#2581b8;border-color:#2581b8;color:white}
+@media(max-width:1500px){.dashboard-grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(max-width:1200px){.dashboard-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.toolbar{padding:0 15px}.search-wrap{width:min(350px,30vw)}}
+@media(max-width:900px){body{overflow:hidden}.dashboard-grid{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(165px,auto)}.status{display:none}.brand{font-size:15px}.toolbar{gap:9px}.search-wrap{flex:1;width:auto}.card{min-height:165px}}
+@media(max-width:650px){.toolbar{height:auto;min-height:60px;flex-wrap:wrap;padding:10px 12px;gap:8px}.brand{width:100%;font-size:15px}.search-wrap{order:2;width:100%;flex-basis:100%}.spacer{display:none}.btn{height:34px;padding:0 10px;font-size:10px}.btn-icon{width:38px}.btn-new{margin-left:auto}.btn-lock{min-width:95px}main{padding:11px 10px 25px}.dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;grid-auto-rows:minmax(158px,auto)}.card{padding:12px 12px 27px;min-height:158px}.card-content{font-size:10.5px}.card-category{left:12px}.new-template{min-height:158px}.two-fields{grid-template-columns:1fr;gap:0}.modal-header{padding:18px 18px 14px}.modal-body{padding:16px 18px}.modal-footer{padding:12px 18px}.hint{display:none}.footer-actions{margin-left:auto}}
+@media(max-width:380px){.dashboard-grid{grid-template-columns:1fr}.card{min-height:130px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+</style>
 </head>
 <body>
-<div class="app">
-  <aside class="sidebar" aria-label="Navegación principal">
-    <div class="brand">
-      <div class="brand-mark">UCAL</div>
-      <div class="brand-name">UCAL<span class="brand-sub">CENTRO DE ATENCIÓN</span></div>
-    </div>
-    <div class="side-label">Biblioteca personal</div>
-    <nav class="nav">
-      <button class="nav-btn active" data-filter="all" type="button">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-        Todas las plantillas <span class="nav-count" id="allCount">0</span>
-      </button>
-      <button class="nav-btn" data-filter="favorites" type="button">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>
-        Favoritas <span class="nav-count" id="favCount">0</span>
-      </button>
-      <button class="nav-btn" data-filter="recent" type="button">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg>
-        Añadidas recientemente
-      </button>
-    </nav>
-    <div class="side-divider"></div>
-    <div class="side-label">Filtrar por categoría</div>
-    <div class="category-list" id="categoryList"></div>
-    <div class="side-spacer"></div>
-    <div class="storage-note">
-      <div class="storage-title"><span style="color:#36c6ae">●</span> Guardado local activo</div>
-      <p>Tus plantillas se almacenan en este navegador. Exporta una copia para respaldarlas o trasladarlas.</p>
-    </div>
-    <div class="side-footer">CENTRO DE ATENCIÓN · UCAL</div>
-  </aside>
-
-  <div class="workspace">
-    <header class="topbar">
-      <div class="crumb">Biblioteca <span style="padding:0 6px;color:#c4cecb">/</span> <strong id="breadcrumb">Todas las plantillas</strong></div>
-      <div class="topbar-spacer"></div>
-      <div class="search-wrap">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7.5"/><path d="m16.5 16.5 4 4"/></svg>
-        <input class="search" id="search" type="search" placeholder="Buscar una plantilla..." aria-label="Buscar plantillas">
-        <span class="shortcut">Ctrl K</span>
-      </div>
-      <button class="topbar-action" id="newBtn" type="button" aria-label="Crear nueva plantilla">
-        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
-        Nueva plantilla
-      </button>
-      <div class="avatar" aria-label="Espacio personal">UC</div>
-    </header>
-
-    <main class="main">
-      <section class="page-heading">
-        <div>
-          <div class="eyebrow">Herramientas de atención</div>
-          <h1 id="heading">Centro de atención</h1>
-          <p class="subtitle">Tu biblioteca de respuestas y plantillas para acompañar a los estudiantes de UCAL.</p>
-        </div>
-        <div class="heading-actions">
-          <button class="button" id="importBtn" type="button">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 15V3m0 0L7.5 7.5M12 3l4.5 4.5"/><path d="M4 14v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/></svg>
-            Importar respaldo
-          </button>
-          <button class="button button-primary" id="newBtn2" type="button">
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
-            Crear plantilla
-          </button>
-          <input id="importFile" type="file" accept="application/json,.json" hidden>
-        </div>
-      </section>
-
-      <section class="stats" aria-label="Resumen de plantillas">
-        <article class="stat-card">
-          <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l5 5v13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg></div>
-          <div><div class="stat-number" id="totalStat">0</div><div class="stat-label">Plantillas registradas</div></div>
-        </article>
-        <article class="stat-card">
-          <div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 1 4 16.5v-11Z"/><path d="M4 16.5A2.5 2.5 0 0 1 6.5 14H20M8 7h8M8 10h5"/></svg></div>
-          <div><div class="stat-number" id="categoryStat">0</div><div class="stat-label">Categorías activas</div></div>
-        </article>
-        <article class="stat-card">
-          <div class="stat-icon gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg></div>
-          <div><div class="stat-number" id="favoriteStat">0</div><div class="stat-label">Respuestas favoritas</div></div>
-        </article>
-      </section>
-
-      <section class="library-panel" aria-label="Biblioteca de plantillas">
-        <div class="library-toolbar">
-          <div>
-            <span class="section-title" id="sectionTitle">Todas las plantillas</span>
-            <span class="section-meta" id="resultCount">0 registros</span>
-          </div>
-          <div class="toolbar-spacer"></div>
-          <select class="select" id="categoryFilter" aria-label="Filtrar por categoría"><option value="all">Todas las categorías</option></select>
-          <select class="select" id="sortFilter" aria-label="Ordenar plantillas">
-            <option value="updated">Más recientes</option>
-            <option value="az">Nombre: A – Z</option>
-            <option value="za">Nombre: Z – A</option>
-          </select>
-          <div class="view-toggle" aria-label="Modo de visualización">
-            <button class="active" id="gridView" type="button" title="Vista de tarjetas" aria-label="Vista de tarjetas">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-            </button>
-            <button id="listView" type="button" title="Vista de lista" aria-label="Vista de lista">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5h12M9 12h12M9 19h12"/><circle cx="4" cy="5" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="19" r="1"/></svg>
-            </button>
-          </div>
-        </div>
-        <div class="template-grid" id="templateGrid"></div>
-        <div class="bottom-note">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
-          Los cambios se guardan automáticamente en este navegador. Recuerda exportar tu respaldo periódicamente.
-        </div>
-      </section>
-    </main>
+<header class="toolbar">
+  <div class="brand">UCAL<span>PRO</span></div>
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input id="searchInput" type="search" placeholder="Filtrar respuestas..." autocomplete="off" aria-label="Filtrar respuestas">
+    <span class="search-tip">Ctrl + F / ESC</span>
   </div>
-</div>
+  <div class="spacer"></div>
+  <div class="status" title="Estado del almacenamiento en este navegador"><span class="led saved" id="statusLed"></span><span id="statusLabel">Guardado</span></div>
+  <button class="btn btn-icon" id="backupBtn" type="button" title="Descargar copia de seguridad" aria-label="Descargar copia de seguridad">💾</button>
+  <button class="btn btn-save" id="saveBtn" type="button">☁ Guardar</button>
+  <button class="btn btn-lock" id="editBtn" type="button">Bloqueado</button>
+  <button class="btn btn-new" id="newBtn" type="button">＋ Nueva plantilla</button>
+</header>
+
+<main>
+  <section class="dashboard-grid" id="grid" aria-label="Plantillas de atención"></section>
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <div class="overlay" id="editorOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-head-copy">
-        <h2 class="modal-title" id="modalTitle">Nueva plantilla</h2>
-        <p class="modal-subtitle">Registra una respuesta para tenerla disponible durante tus atenciones.</p>
+  <section class="modal">
+    <div class="modal-header">
+      <div class="modal-heading">
+        <h2 id="modalTitle">Nueva plantilla</h2>
+        <p>Registra una respuesta para utilizarla durante la atención.</p>
       </div>
-      <button class="modal-close" id="closeEditor" type="button" aria-label="Cerrar ventana">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 6 12 12M18 6 6 18"/></svg>
-      </button>
+      <button class="close" id="closeModal" type="button" aria-label="Cerrar">×</button>
     </div>
     <form id="templateForm">
       <div class="modal-body">
         <input type="hidden" id="templateId">
         <div class="field">
-          <label for="title">Nombre de la plantilla <span class="required">*</span></label>
-          <input id="title" required maxlength="100" placeholder="Ej. Consulta sobre proceso de matrícula">
+          <label for="templateTitle">Nombre o referencia de la plantilla</label>
+          <input id="templateTitle" maxlength="100" placeholder="Ej. Seguimiento de ticket">
         </div>
-        <div class="form-grid">
+        <div class="two-fields">
           <div class="field">
-            <label for="category">Categoría <span class="required">*</span></label>
-            <input id="category" required maxlength="50" list="categoryOptions" placeholder="Ej. Matrícula">
+            <label for="templateCategory">Categoría</label>
+            <input id="templateCategory" list="categoryOptions" maxlength="50" placeholder="Ej. Trámites académicos">
             <datalist id="categoryOptions"></datalist>
           </div>
           <div class="field">
-            <label for="channel">Canal de atención</label>
-            <select id="channel">
+            <label for="templateChannel">Canal de atención</label>
+            <select id="templateChannel">
               <option value="Todos">Todos los canales</option>
               <option value="Llamada">Llamada</option>
               <option value="WhatsApp">WhatsApp</option>
@@ -333,328 +165,298 @@
           </div>
         </div>
         <div class="field">
-          <label for="content">Texto de la plantilla <span class="required">*</span></label>
-          <textarea id="content" required placeholder="Escribe aquí el speech o la respuesta que utilizarás durante la atención..."></textarea>
-          <div class="field-help">Puedes conservar variables como [NOMBRE DEL ESTUDIANTE], [CÓDIGO] o [FECHA] para completarlas al momento de atender.</div>
+          <label for="templateContent">Texto que se copiará</label>
+          <textarea id="templateContent" required placeholder="Escribe aquí el speech o respuesta completa..."></textarea>
+        </div>
+        <div class="field">
+          <div class="color-label"><label style="margin:0">Color de la tarjeta</label><span class="hint" id="selectedColorName">Azul</span></div>
+          <div class="palette" id="colorPalette"></div>
         </div>
       </div>
       <div class="modal-footer">
-        <span class="footer-hint">Los campos con * son obligatorios.</span>
+        <span class="hint">El texto se copiará exactamente como lo registres.</span>
         <div class="footer-actions">
-          <button class="button" id="cancelEditor" type="button">Cancelar</button>
-          <button class="button button-primary" type="submit">Guardar plantilla</button>
+          <button class="modal-btn" id="cancelBtn" type="button">Cancelar</button>
+          <button class="modal-btn primary" type="submit">Guardar plantilla</button>
         </div>
       </div>
     </form>
-  </div>
+  </section>
 </div>
-
-<div class="overlay" id="viewOverlay" role="dialog" aria-modal="true" aria-labelledby="viewTitle">
-  <div class="modal">
-    <div class="modal-head">
-      <div class="modal-head-copy">
-        <h2 class="modal-title" id="viewTitle">Vista de plantilla</h2>
-        <p class="modal-subtitle" id="viewMeta"></p>
-      </div>
-      <button class="modal-close" id="closeView" type="button" aria-label="Cerrar ventana">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 6 12 12M18 6 6 18"/></svg>
-      </button>
-    </div>
-    <div class="modal-body"><div class="view-text" id="viewContent"></div></div>
-    <div class="modal-footer">
-      <span class="footer-hint">El texto se copia sin modificaciones.</span>
-      <div class="footer-actions">
-        <button class="button" id="closeView2" type="button">Cerrar</button>
-        <button class="button button-primary" id="copyView" type="button">Copiar texto</button>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (() => {
   "use strict";
   const STORAGE_KEY = "ucal_attention_templates_v1";
+  const colors = [
+    {id:"c-blue",name:"Azul",bg:"linear-gradient(135deg,#e2f1ff,#bfdef9)"},
+    {id:"c-green",name:"Verde",bg:"linear-gradient(135deg,#e8f7e9,#c8e7cb)"},
+    {id:"c-purple",name:"Lila",bg:"linear-gradient(135deg,#f2e4f6,#e2c6eb)"},
+    {id:"c-orange",name:"Naranja",bg:"linear-gradient(135deg,#fff1d9,#ffe0b3)"},
+    {id:"c-red",name:"Rojo",bg:"linear-gradient(135deg,#ffedef,#ffd1d7)"},
+    {id:"c-gray",name:"Gris",bg:"linear-gradient(135deg,#fff,#f0f2f4)"},
+    {id:"c-teal",name:"Turquesa",bg:"linear-gradient(135deg,#e0f5f1,#b7e5dc)"},
+    {id:"c-pink",name:"Rosa",bg:"linear-gradient(135deg,#fce6ee,#f6c4d7)"},
+    {id:"c-indigo",name:"Índigo",bg:"linear-gradient(135deg,#e9eafd,#cbd0f1)"},
+    {id:"c-lime",name:"Lima",bg:"linear-gradient(135deg,#f7fbe7,#deedc4)"},
+    {id:"c-amber",name:"Ámbar",bg:"linear-gradient(135deg,#fff8e5,#ffe7a8)"},
+    {id:"c-brown",name:"Marrón",bg:"linear-gradient(135deg,#f2ebe7,#d9c8bd)"},
+    {id:"c-dark",name:"Oscuro",bg:"linear-gradient(135deg,#35444b,#20282c)"},
+    {id:"c-purple-dark",name:"Morado oscuro",bg:"linear-gradient(135deg,#4d1d93,#31167e)"},
+    {id:"c-lavender",name:"Lavanda",bg:"linear-gradient(135deg,#f0eafa,#d7c8ef)"}
+  ];
   const $ = id => document.getElementById(id);
   let templates = loadTemplates();
-  let activeFilter = "all";
-  let activeCategory = "all";
-  let layoutMode = "grid";
+  let editing = false;
+  let selectedColor = "c-blue";
+  let draggedId = null;
   let toastTimer = null;
 
   function loadTemplates(){
     try{
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if(!stored) return [];
-      const parsed = JSON.parse(stored);
-      return Array.isArray(parsed) ? parsed.filter(item => item && typeof item === "object" && item.id && item.id !== "demo-1" && item.title && item.content !== undefined) : [];
-    }catch(error){
-      console.error("No fue posible cargar las plantillas:", error);
-      return [];
-    }
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return [];
+      const data = JSON.parse(raw);
+      if(!Array.isArray(data)) return [];
+      return data.filter(item => item && typeof item === "object" && item.id && item.id !== "demo-1" && item.content !== undefined)
+        .map((item,index) => ({
+          id:String(item.id),
+          title:String(item.title || ""),
+          category:String(item.category || ""),
+          channel:String(item.channel || "Todos"),
+          content:String(item.content || ""),
+          color:colors.some(color => color.id === item.color) ? item.color : colors[index % colors.length].id,
+          favorite:!!item.favorite,
+          createdAt:Number(item.createdAt) || Date.now(),
+          updatedAt:Number(item.updatedAt) || Number(item.createdAt) || Date.now()
+        }));
+    }catch(error){console.error("Error al cargar las plantillas",error);return [];}
   }
-  function saveTemplates(){
+  function setStatus(state,label){
+    $("statusLed").className = "led " + state;
+    $("statusLabel").textContent = label;
+  }
+  function saveData(showMessage){
     try{
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(templates));
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(templates));
+      setStatus("saved","Guardado");
+      if(showMessage) showToast("Cambios guardados en este navegador.");
       return true;
     }catch(error){
-      console.error("No fue posible guardar las plantillas:", error);
-      showToast("No se pudo guardar. Exporta una copia y libera espacio del navegador.");
+      setStatus("error","Error al guardar");
+      showToast("No se pudo guardar. Descarga un respaldo y libera espacio.");
       return false;
     }
-  }
-  function escapeHtml(value){
-    return String(value ?? "").replace(/[&<>"']/g, char => ({
-      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-    })[char]);
-  }
-  function categories(){
-    return [...new Set(templates.map(item => String(item.category || "").trim()).filter(Boolean))]
-      .sort((a,b) => a.localeCompare(b,"es"));
-  }
-  function formatDate(timestamp){
-    const date = new Date(Number(timestamp) || Date.now());
-    return new Intl.DateTimeFormat("es-PE",{day:"2-digit",month:"short",year:"numeric"}).format(date);
-  }
-  function makeId(){
-    return window.crypto && crypto.randomUUID ? crypto.randomUUID() : "tpl-" + Date.now() + "-" + Math.random().toString(36).slice(2,8);
   }
   function showToast(message){
     const element = $("toast");
     element.textContent = message;
     element.classList.add("show");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => element.classList.remove("show"), 2400);
+    toastTimer = setTimeout(() => element.classList.remove("show"),2200);
   }
-  function iconDoc(){
-    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l5 5v13H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>';
+  function escapeHtml(value){
+    return String(value ?? "").replace(/[&<>"']/g,char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[char]);
   }
-  function iconStar(filled){
-    return '<svg viewBox="0 0 24 24" fill="'+(filled ? "currentColor" : "none")+'" stroke="currentColor" stroke-width="1.8"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>';
+  function colorName(id){
+    const color = colors.find(item => item.id === id);
+    return color ? color.name : "Azul";
   }
-  function iconCopy(){
-    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"/></svg>';
+  function renderPalette(){
+    $("colorPalette").innerHTML = colors.map(color =>
+      '<button type="button" class="swatch '+(selectedColor===color.id?"selected":"")+'" data-color="'+color.id+'" title="'+color.name+'" aria-label="Color '+color.name+'" style="background:'+color.bg+'"></button>'
+    ).join("");
+    $("selectedColorName").textContent = colorName(selectedColor);
   }
-  function renderStats(){
-    $("allCount").textContent = templates.length;
-    $("favCount").textContent = templates.filter(item => item.favorite).length;
-    $("totalStat").textContent = templates.length;
-    $("categoryStat").textContent = categories().length;
-    $("favoriteStat").textContent = templates.filter(item => item.favorite).length;
+  function categories(){
+    return [...new Set(templates.map(item => item.category.trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"));
   }
-  function renderCategories(){
-    const list = categories();
-    $("categoryList").innerHTML = list.length ? list.map(category =>
-      '<button type="button" class="category-btn '+(activeCategory === category ? "active" : "")+'" data-category="'+escapeHtml(category)+'"><span class="category-dot"></span><span>'+escapeHtml(category)+'</span><span class="category-count">'+templates.filter(item => item.category === category).length+'</span></button>'
-    ).join("") : '<div style="padding:8px 11px;color:#81918f;font-size:11px">Tus categorías aparecerán aquí.</div>';
-    $("categoryFilter").innerHTML = '<option value="all">Todas las categorías</option>' + list.map(category => '<option value="'+escapeHtml(category)+'">'+escapeHtml(category)+'</option>').join("");
-    $("categoryFilter").value = activeCategory;
-    $("categoryOptions").innerHTML = list.map(category => '<option value="'+escapeHtml(category)+'"></option>').join("");
+  function renderCategoryOptions(){
+    $("categoryOptions").innerHTML = categories().map(category=>'<option value="'+escapeHtml(category)+'"></option>').join("");
   }
-  function getVisibleTemplates(){
-    const query = $("search").value.trim().toLocaleLowerCase("es");
-    let result = templates.slice();
-    if(activeFilter === "favorites") result = result.filter(item => item.favorite);
-    if(activeFilter === "recent") result = result.sort((a,b) => (Number(b.createdAt)||0) - (Number(a.createdAt)||0)).slice(0,12);
-    if(activeCategory !== "all") result = result.filter(item => item.category === activeCategory);
-    if(query){
-      result = result.filter(item => [item.title,item.category,item.channel,item.content].join(" ").toLocaleLowerCase("es").includes(query));
-    }
-    const sort = $("sortFilter").value;
-    if(sort === "az") result.sort((a,b) => a.title.localeCompare(b.title,"es"));
-    else if(sort === "za") result.sort((a,b) => b.title.localeCompare(a.title,"es"));
-    else result.sort((a,b) => (Number(b.updatedAt)||0) - (Number(a.updatedAt)||0));
-    return result;
-  }
-  function currentLabel(){
-    if(activeCategory !== "all") return activeCategory;
-    if(activeFilter === "favorites") return "Favoritas";
-    if(activeFilter === "recent") return "Añadidas recientemente";
-    return "Todas las plantillas";
+  function cardHtml(item){
+    const category = item.category ? '<span class="card-category">'+escapeHtml(item.category)+'</span>' : "";
+    const label = item.title ? '<div class="card-label">'+escapeHtml(item.title)+'</div>' : "";
+    const tools = '<div class="card-actions">'+
+      '<button class="card-tool" type="button" data-action="edit" data-id="'+escapeHtml(item.id)+'" title="Editar">✎</button>'+
+      '<button class="card-tool" type="button" data-action="delete" data-id="'+escapeHtml(item.id)+'" title="Eliminar">×</button>'+
+    '</div>';
+    return '<article class="card '+escapeHtml(item.color)+'" data-id="'+escapeHtml(item.id)+'" draggable="'+(editing?"true":"false")+'" tabindex="0" role="button" aria-label="'+(editing?"Editar ":"Copiar ")+escapeHtml(item.title || item.content.slice(0,60))+'">'+
+      label+'<div class="card-content">'+escapeHtml(item.content)+'</div>'+category+tools+'</article>';
   }
   function render(){
-    renderStats();
-    renderCategories();
-    const result = getVisibleTemplates();
-    const label = currentLabel();
-    $("breadcrumb").textContent = label;
-    $("sectionTitle").textContent = label;
-    $("resultCount").textContent = result.length + (result.length === 1 ? " registro" : " registros");
-    $("templateGrid").classList.toggle("list-view", layoutMode === "list");
-    $("gridView").classList.toggle("active", layoutMode === "grid");
-    $("listView").classList.toggle("active", layoutMode === "list");
-    document.querySelectorAll(".nav-btn").forEach(button => {
-      button.classList.toggle("active", activeCategory === "all" && button.dataset.filter === activeFilter);
+    renderCategoryOptions();
+    const query = $("searchInput").value.trim().toLocaleLowerCase("es");
+    const filtered = templates.filter(item => {
+      if(!query) return true;
+      return [item.title,item.category,item.channel,item.content].join(" ").toLocaleLowerCase("es").includes(query);
     });
-    if(!result.length){
-      const hasSearch = $("search").value.trim().length > 0;
-      $("templateGrid").innerHTML =
-        '<div class="empty-state"><div class="empty-icon">'+iconDoc()+'</div><h3>'+(hasSearch ? "No encontramos coincidencias" : "Tu biblioteca está lista para empezar")+'</h3><p>'+(hasSearch ? "Prueba con otras palabras o cambia los filtros." : "Registra tu primera plantilla y tendrás tus respuestas organizadas en un solo lugar.")+'</p>' +
-        (hasSearch ? '<button class="button" id="clearSearch" type="button">Limpiar búsqueda</button>' : '<button class="button button-primary" id="emptyNew" type="button">＋ Crear primera plantilla</button>')+
-        '</div>';
-      const emptyNew = $("emptyNew");
-      if(emptyNew) emptyNew.addEventListener("click", () => openEditor());
-      const clearSearch = $("clearSearch");
-      if(clearSearch) clearSearch.addEventListener("click", () => {$("search").value="";render()});
-      return;
+    $("grid").innerHTML = filtered.map(cardHtml).join("") + (editing ?
+      '<button class="new-template" type="button" id="addCard"><span class="plus">＋</span><span>Agregar plantilla</span></button>' : "");
+    const add = $("addCard");
+    if(add) add.addEventListener("click",() => openEditor());
+    if(!filtered.length && !editing){
+      $("grid").innerHTML = '<div class="empty-state"><strong>'+(templates.length?"No se encontraron respuestas":"Aún no tienes plantillas registradas")+'</strong><span>'+(templates.length?"Prueba con otra palabra para filtrar.":"Activa el modo de edición para agregar tu primera plantilla.")+'</span></div>';
     }
-    $("templateGrid").innerHTML = result.map(item => {
-      const channel = item.channel || "Todos";
-      const preview = String(item.content || "").slice(0,240);
-      return '<article class="template-card">'+
-        '<div class="card-head">'+
-          '<div class="template-mark">'+iconDoc()+'</div>'+
-          '<div class="card-heading"><h3 class="card-title">'+escapeHtml(item.title)+'</h3><div class="card-category">'+escapeHtml(item.category || "Sin categoría")+'</div></div>'+
-          '<button class="favorite-btn '+(item.favorite ? "is-favorite" : "")+'" data-action="favorite" data-id="'+escapeHtml(item.id)+'" type="button" aria-label="'+(item.favorite ? "Quitar de favoritas" : "Añadir a favoritas")+'" title="Favorita">'+iconStar(!!item.favorite)+'</button>'+
-        '</div>'+
-        '<div class="card-channel"><span class="channel-pill">'+escapeHtml(channel)+'</span><span>·</span><span>Actualizada '+escapeHtml(formatDate(item.updatedAt))+'</span></div>'+
-        '<p class="card-preview">'+escapeHtml(preview)+(String(item.content || "").length > 240 ? "…" : "")+'</p>'+
-        '<div class="card-footer"><span class="updated">Creada '+escapeHtml(formatDate(item.createdAt))+'</span><div class="card-actions">'+
-          '<button class="icon-action copy-action" data-action="copy" data-id="'+escapeHtml(item.id)+'" type="button">'+iconCopy()+' Copiar</button>'+
-          '<button class="icon-action" data-action="view" data-id="'+escapeHtml(item.id)+'" type="button" aria-label="Ver plantilla" title="Ver">'+
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 12s3.3-6 9.5-6 9.5 6 9.5 6-3.3 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>'+
-          '</button>'+
-          '<button class="icon-action" data-action="edit" data-id="'+escapeHtml(item.id)+'" type="button" aria-label="Editar plantilla" title="Editar">'+
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m15 5 4 4M4 20l4.2-.9L19 8.3a2.1 2.1 0 0 0-3-3L5.2 16.1 4 20Z"/></svg>'+
-          '</button>'+
-          '<button class="icon-action" data-action="delete" data-id="'+escapeHtml(item.id)+'" type="button" aria-label="Eliminar plantilla" title="Eliminar">'+
-            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M10 11v6M14 11v6M5.5 7l1 14h11l1-14M9 7V4h6v3"/></svg>'+
-          '</button>'+
-        '</div></div></article>';
-    }).join("");
+  }
+  function setEditing(value){
+    editing = value;
+    document.body.classList.toggle("editing",editing);
+    $("editBtn").textContent = editing ? "Edición activa" : "Bloqueado";
+    $("editBtn").classList.toggle("editing",editing);
+    $("editBtn").setAttribute("aria-pressed",String(editing));
+    render();
+    if(editing) showToast("Modo de edición activado.");
+    else showToast("Edición bloqueada.");
   }
   function openEditor(item){
     $("templateForm").reset();
     $("templateId").value = item ? item.id : "";
     $("modalTitle").textContent = item ? "Editar plantilla" : "Nueva plantilla";
-    $("title").value = item ? item.title : "";
-    $("category").value = item ? item.category : (activeCategory !== "all" ? activeCategory : "");
-    $("channel").value = item ? (item.channel || "Todos") : "Todos";
-    $("content").value = item ? item.content : "";
+    $("templateTitle").value = item ? item.title : "";
+    $("templateCategory").value = item ? item.category : "";
+    $("templateChannel").value = item ? item.channel || "Todos" : "Todos";
+    $("templateContent").value = item ? item.content : "";
+    selectedColor = item ? item.color : "c-blue";
+    renderPalette();
     $("editorOverlay").classList.add("open");
-    setTimeout(() => $("title").focus(),50);
+    setTimeout(()=>$("templateTitle").focus(),30);
   }
-  function closeEditor(){$("editorOverlay").classList.remove("open")}
-  function closeViewer(){$("viewOverlay").classList.remove("open")}
+  function closeEditor(){$("editorOverlay").classList.remove("open");}
   async function copyText(value){
     try{
       if(navigator.clipboard && window.isSecureContext) await navigator.clipboard.writeText(value);
       else{
-        const field = document.createElement("textarea");
-        field.value = value;field.style.position = "fixed";field.style.opacity = "0";
-        document.body.appendChild(field);field.select();
-        const copied = document.execCommand("copy");field.remove();
-        if(!copied) throw new Error("No se pudo copiar");
+        const area=document.createElement("textarea");
+        area.value=value;area.style.position="fixed";area.style.opacity="0";
+        document.body.appendChild(area);area.select();
+        const ok=document.execCommand("copy");area.remove();
+        if(!ok) throw new Error("Copy failed");
       }
-      showToast("Texto copiado al portapapeles");
-    }catch(error){showToast("No se pudo copiar automáticamente. Selecciona el texto para copiarlo.");}
+      showToast("Respuesta copiada.");
+    }catch(error){showToast("No se pudo copiar automáticamente.");}
   }
-  $("templateForm").addEventListener("submit", event => {
+  function downloadBackup(){
+    const blob = new Blob([JSON.stringify(templates,null,2)],{type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href=url;link.download="respaldo-plantillas-ucal.json";
+    document.body.appendChild(link);link.click();link.remove();
+    URL.revokeObjectURL(url);
+    showToast("Copia de seguridad descargada.");
+  }
+
+  $("editBtn").addEventListener("click",()=>setEditing(!editing));
+  $("newBtn").addEventListener("click",()=>{if(editing)openEditor();});
+  $("saveBtn").addEventListener("click",()=>saveData(true));
+  $("backupBtn").addEventListener("click",downloadBackup);
+  $("searchInput").addEventListener("input",render);
+  $("closeModal").addEventListener("click",closeEditor);
+  $("cancelBtn").addEventListener("click",closeEditor);
+  $("editorOverlay").addEventListener("click",event=>{if(event.target===$("editorOverlay"))closeEditor();});
+  $("colorPalette").addEventListener("click",event=>{
+    const button=event.target.closest("[data-color]");
+    if(!button)return;
+    selectedColor=button.dataset.color;renderPalette();
+  });
+  $("templateForm").addEventListener("submit",event=>{
     event.preventDefault();
-    const id = $("templateId").value;
-    const oldItem = templates.find(item => item.id === id);
-    const title = $("title").value.trim();
-    const category = $("category").value.trim();
-    const content = $("content").value.trim();
-    if(!title || !category || !content){showToast("Completa los campos obligatorios.");return;}
-    const now = Date.now();
-    const item = {
-      id: oldItem ? oldItem.id : makeId(),
-      title,category,channel:$("channel").value,content,
-      favorite:oldItem ? !!oldItem.favorite : false,
-      createdAt:oldItem ? oldItem.createdAt : now,
+    if(!editing){showToast("Activa el modo de edición para modificar plantillas.");return;}
+    const id=$("templateId").value;
+    const previous=templates.find(item=>item.id===id);
+    const content=$("templateContent").value.trim();
+    if(!content){showToast("Escribe el texto de la plantilla.");return;}
+    const now=Date.now();
+    const item={
+      id:previous?previous.id:(crypto.randomUUID?crypto.randomUUID():"tpl-"+now+"-"+Math.random().toString(36).slice(2)),
+      title:$("templateTitle").value.trim(),
+      category:$("templateCategory").value.trim(),
+      channel:$("templateChannel").value,
+      content,
+      color:selectedColor,
+      favorite:previous?previous.favorite:false,
+      createdAt:previous?previous.createdAt:now,
       updatedAt:now
     };
-    if(oldItem) templates = templates.map(entry => entry.id === id ? item : entry);
+    if(previous)templates=templates.map(entry=>entry.id===id?item:entry);
     else templates.push(item);
-    if(saveTemplates()){closeEditor();render();showToast(oldItem ? "Plantilla actualizada correctamente." : "Plantilla registrada correctamente.");}
+    if(saveData(false)){closeEditor();render();showToast(previous?"Plantilla actualizada.":"Plantilla agregada.");}
   });
-  $("templateGrid").addEventListener("click", event => {
-    const button = event.target.closest("button[data-action]");
-    if(!button) return;
-    const item = templates.find(entry => entry.id === button.dataset.id);
-    if(!item) return;
-    const action = button.dataset.action;
-    if(action === "copy") copyText(item.content);
-    if(action === "edit") openEditor(item);
-    if(action === "view"){
-      $("viewTitle").textContent = item.title;
-      $("viewMeta").textContent = (item.category || "Sin categoría") + " · " + (item.channel || "Todos los canales");
-      $("viewContent").textContent = item.content;
-      $("copyView").dataset.id = item.id;
-      $("viewOverlay").classList.add("open");
-    }
-    if(action === "favorite"){
-      item.favorite = !item.favorite;item.updatedAt = Date.now();
-      if(saveTemplates()){render();showToast(item.favorite ? "Añadida a tus favoritas." : "Eliminada de tus favoritas.");}
-    }
-    if(action === "delete"){
-      if(confirm('¿Deseas eliminar la plantilla "'+item.title+'"? Esta acción no se puede deshacer.')){
-        templates = templates.filter(entry => entry.id !== item.id);
-        if(saveTemplates()){render();showToast("Plantilla eliminada.");}
+  $("grid").addEventListener("click",event=>{
+    const tool=event.target.closest("[data-action]");
+    const card=event.target.closest(".card");
+    if(tool){
+      event.stopPropagation();
+      const item=templates.find(entry=>entry.id===tool.dataset.id);
+      if(!item)return;
+      if(tool.dataset.action==="edit" && editing)openEditor(item);
+      if(tool.dataset.action==="delete" && editing && confirm("¿Eliminar esta plantilla?")){
+        templates=templates.filter(entry=>entry.id!==item.id);
+        if(saveData(false)){render();showToast("Plantilla eliminada.");}
       }
+      return;
+    }
+    if(card){
+      const item=templates.find(entry=>entry.id===card.dataset.id);
+      if(!item)return;
+      if(editing)openEditor(item);
+      else copyText(item.content);
     }
   });
-  document.querySelectorAll(".nav-btn").forEach(button => button.addEventListener("click", () => {
-    activeFilter = button.dataset.filter;activeCategory = "all";$("search").value = "";render();
-    $("heading").textContent = activeFilter === "favorites" ? "Tus favoritas" : activeFilter === "recent" ? "Añadidas recientemente" : "Centro de atención";
-  }));
-  $("categoryList").addEventListener("click", event => {
-    const button = event.target.closest("[data-category]");
-    if(!button) return;
-    activeCategory = button.dataset.category;activeFilter = "all";$("search").value = "";render();
-    $("heading").textContent = activeCategory;
+  $("grid").addEventListener("keydown",event=>{
+    if(event.key!=="Enter" && event.key!==" ")return;
+    const card=event.target.closest(".card");
+    if(!card || event.target.closest("button"))return;
+    event.preventDefault();
+    const item=templates.find(entry=>entry.id===card.dataset.id);
+    if(!item)return;
+    if(editing)openEditor(item);else copyText(item.content);
   });
-  $("search").addEventListener("input", render);
-  $("categoryFilter").addEventListener("change", event => {activeCategory = event.target.value;activeFilter = "all";render();});
-  $("sortFilter").addEventListener("change", render);
-  $("newBtn").addEventListener("click", () => openEditor());
-  $("newBtn2").addEventListener("click", () => openEditor());
-  $("closeEditor").addEventListener("click", closeEditor);
-  $("cancelEditor").addEventListener("click", closeEditor);
-  $("editorOverlay").addEventListener("click", event => {if(event.target === $("editorOverlay")) closeEditor();});
-  $("closeView").addEventListener("click", closeViewer);
-  $("closeView2").addEventListener("click", closeViewer);
-  $("viewOverlay").addEventListener("click", event => {if(event.target === $("viewOverlay")) closeViewer();});
-  $("copyView").addEventListener("click", () => {
-    const item = templates.find(entry => entry.id === $("copyView").dataset.id);
-    if(item) copyText(item.content);
+  $("grid").addEventListener("dragstart",event=>{
+    const card=event.target.closest(".card");
+    if(!editing || !card){event.preventDefault();return;}
+    draggedId=card.dataset.id;
+    card.classList.add("dragging");
+    event.dataTransfer.effectAllowed="move";
   });
-  $("gridView").addEventListener("click", () => {layoutMode = "grid";render();});
-  $("listView").addEventListener("click", () => {layoutMode = "list";render();});
-  $("importBtn").addEventListener("click", () => $("importFile").click());
-  $("importFile").addEventListener("change", async event => {
-    const file = event.target.files && event.target.files[0];
-    if(!file) return;
-    try{
-      const imported = JSON.parse(await file.text());
-      if(!Array.isArray(imported) || !imported.every(item => item && typeof item === "object" && item.title && item.content !== undefined)){
-        throw new Error("Formato de respaldo no válido");
-      }
-      const byId = new Map(templates.map(item => [item.id,item]));
-      imported.forEach((item,index) => {
-        const safeItem = {
-          id:item.id || makeId(),title:String(item.title),category:String(item.category || "General"),
-          channel:String(item.channel || "Todos"),content:String(item.content),
-          favorite:!!item.favorite,createdAt:Number(item.createdAt) || Date.now()+index,
-          updatedAt:Number(item.updatedAt) || Date.now()+index
-        };
-        byId.set(safeItem.id,safeItem);
-      });
-      templates = [...byId.values()];
-      if(saveTemplates()){render();showToast("Respaldo importado correctamente.");}
-    }catch(error){showToast("No se pudo importar. Verifica que sea un respaldo JSON válido.");}
-    event.target.value = "";
+  $("grid").addEventListener("dragover",event=>{
+    if(!editing)return;
+    const target=event.target.closest(".card");
+    if(!target || target.dataset.id===draggedId)return;
+    event.preventDefault();
+    document.querySelectorAll(".card.drag-over").forEach(item=>item.classList.remove("drag-over"));
+    target.classList.add("drag-over");
   });
-  $("heading").textContent = templates.length ? "Centro de atención" : "Comienza a organizar tus respuestas";
-  window.addEventListener("keydown", event => {
-    if((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k"){
-      event.preventDefault();$("search").focus();
+  $("grid").addEventListener("drop",event=>{
+    if(!editing || !draggedId)return;
+    const target=event.target.closest(".card");
+    if(!target || target.dataset.id===draggedId)return;
+    event.preventDefault();
+    const from=templates.findIndex(item=>item.id===draggedId);
+    const to=templates.findIndex(item=>item.id===target.dataset.id);
+    if(from<0||to<0)return;
+    const moved=templates.splice(from,1)[0];
+    templates.splice(to,0,moved);
+    saveData(false);render();showToast("Orden de tarjetas actualizado.");
+  });
+  $("grid").addEventListener("dragend",()=>{
+    draggedId=null;
+    document.querySelectorAll(".card.dragging,.card.drag-over").forEach(item=>item.classList.remove("dragging","drag-over"));
+  });
+  window.addEventListener("keydown",event=>{
+    if((event.ctrlKey||event.metaKey) && event.key.toLowerCase()==="f"){
+      event.preventDefault();$("searchInput").focus();
     }
-    if(event.key === "Escape"){closeEditor();closeViewer();}
+    if((event.ctrlKey||event.metaKey) && event.key.toLowerCase()==="s"){
+      event.preventDefault();saveData(true);
+    }
+    if(event.key==="Escape"){
+      if($("editorOverlay").classList.contains("open"))closeEditor();
+      else{$("searchInput").value="";render();}
+    }
   });
   render();
+  setStatus("saved","Guardado");
 })();
 </script>
 </body>
