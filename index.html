@@ -279,7 +279,7 @@ body.editing .new-template{display:grid}
     $("templateContent").value = item ? item.content : "";
     selectedColor = item ? item.color : colors[templates.length % colors.length].id;
     $("editorOverlay").classList.add("open");
-    setTimeout(()=>$("templateTitle").focus(),30);
+    setTimeout(()=>$("templateContent").focus(),30);
   }
   function closeEditor(){$("editorOverlay").classList.remove("open");}
   async function copyText(value){
