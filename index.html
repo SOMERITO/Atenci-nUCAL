@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#152b4a">
+<title>UCAL | Centro de atención</title>
+<style>
+:root{--navy:#142b4c;--blue:#2463a6;--cyan:#dceefa;--ink:#202b3b;--muted:#718096;--bg:#f3f6fa;--line:#e2e8f0;--white:#fff;--shadow:0 8px 28px #102b4c12;--radius:16px}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+header{background:linear-gradient(120deg,#142b4c,#234f7d);color:#fff;padding:20px 28px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;box-shadow:0 4px 18px #142b4c22}
+.brand{font-weight:900;font-size:20px;letter-spacing:.4px;white-space:nowrap}.brand small{display:block;font-size:10px;letter-spacing:2px;font-weight:700;opacity:.7;margin-top:2px}
+.search{flex:1;min-width:220px;max-width:520px;position:relative}.search input{width:100%;border:1px solid #ffffff42;background:#ffffff18;color:white;border-radius:24px;padding:12px 16px 12px 42px;outline:none}.search input::placeholder{color:#ffffffb9}.search span{position:absolute;left:15px;top:11px}
+.header-actions{margin-left:auto;display:flex;gap:9px;align-items:center}.btn{border:0;border-radius:10px;padding:10px 14px;font-weight:750;transition:.18s}.btn:hover{transform:translateY(-1px);filter:brightness(1.04)}.btn-light{background:#fff;color:var(--navy)}.btn-blue{background:var(--blue);color:#fff}.btn-ghost{background:#ffffff1c;color:#fff;border:1px solid #ffffff35}.btn-danger{background:#fff0f0;color:#b42318}.btn-small{padding:7px 10px;font-size:12px}
+main{max-width:1440px;margin:auto;padding:24px;display:grid;grid-template-columns:255px minmax(0,1fr);gap:22px}
+.sidebar,.panel{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.sidebar{padding:18px;height:max-content;position:sticky;top:18px}.side-title{font-size:11px;font-weight:850;color:var(--muted);letter-spacing:1.1px;text-transform:uppercase;margin:4px 10px 12px}
+.nav-item{display:flex;width:100%;gap:10px;align-items:center;padding:11px 12px;border:0;background:transparent;color:#42516a;border-radius:10px;text-align:left;font-weight:650;margin:3px 0}.nav-item:hover,.nav-item.active{background:#eaf3fb;color:#174c80}.nav-count{margin-left:auto;color:#8291a5;font-size:12px}
+.categories{margin-top:22px;border-top:1px solid var(--line);padding-top:17px}.cat-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;font-size:13px;color:#526176;cursor:pointer}.cat-item:hover,.cat-item.active{background:#f0f6fb;color:#174c80;font-weight:750}.dot{width:9px;height:9px;border-radius:50%;background:var(--cat,#7b9dbd)}
+.content{min-width:0}.welcome{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin:2px 0 20px;flex-wrap:wrap}.eyebrow{font-size:11px;color:var(--blue);font-weight:850;letter-spacing:1.3px;text-transform:uppercase}.welcome h1{font-size:26px;margin:5px 0}.welcome p{margin:0;color:var(--muted);font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}.stat{padding:15px 17px;background:#fff;border:1px solid var(--line);border-radius:13px}.stat strong{display:block;font-size:24px;color:var(--navy)}.stat span{font-size:12px;color:var(--muted)}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0 16px}.toolbar select{border:1px solid var(--line);background:white;border-radius:9px;padding:10px 12px;color:#435168}.toolbar .result{margin-left:auto;color:var(--muted);font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:14px}
+.template{background:white;border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:0 3px 12px #132b4c08;display:flex;flex-direction:column;min-height:190px;transition:.2s;position:relative}
+.template:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#c4d8ea}.template-top{display:flex;gap:9px;align-items:center;margin-bottom:12px}.template-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:#eaf3fb;font-size:16px}.template h3{margin:0;font-size:14px;line-height:1.35}.tag{font-size:10px;color:#39658d;background:#edf5fb;padding:4px 7px;border-radius:20px;margin-left:auto;white-space:nowrap}
+.template p{font-size:12px;line-height:1.55;color:#58677b;white-space:pre-wrap;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;margin:0 0 14px;flex:1}
+.template-actions{display:flex;gap:7px;border-top:1px solid #edf0f4;padding-top:11px}.template-actions button{border:0;background:#f1f5f9;color:#3d5874;border-radius:8px;padding:7px 9px;font-size:11px;font-weight:750}.template-actions .copy{background:#e9f3fc;color:#1d5a91;flex:1}.empty{grid-column:1/-1;text-align:center;background:#fff;border:1px dashed #cbd5e1;border-radius:14px;padding:45px 20px;color:var(--muted)}
+.overlay{position:fixed;inset:0;background:#142b4c70;backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;padding:18px;z-index:10}.modal{background:#fff;border-radius:18px;width:min(620px,100%);max-height:92vh;overflow:auto;padding:24px;box-shadow:0 25px 80px #102b4c44}.modal h2{margin:0 0 5px;font-size:20px}.modal .sub{color:var(--muted);font-size:13px;margin:0 0 20px}.field{margin:13px 0}.field label{display:block;font-size:12px;font-weight:800;color:#45566d;margin-bottom:6px}.field input,.field textarea,.field select{width:100%;border:1px solid #d9e1e9;border-radius:9px;padding:11px 12px;outline:none;background:#fff;color:var(--ink)}.field textarea{min-height:170px;resize:vertical;line-height:1.5}.field input:focus,.field textarea:focus,.field select:focus{border-color:#4d8bc3;box-shadow:0 0 0 3px #2463a61a}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:20px}.btn-cancel{background:#eef2f6;color:#42516a}.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(15px);background:#172b46;color:#fff;padding:11px 17px;border-radius:30px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.2s;z-index:20}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+footer{text-align:center;color:#94a3b8;font-size:11px;padding:10px 20px 22px}
+@media(max-width:850px){main{grid-template-columns:1fr;padding:15px}.sidebar{position:static}.sidebar nav{display:flex;flex-wrap:wrap}.nav-item{width:auto}.categories{display:none}.stats{gap:8px}.stat{padding:12px}.stat strong{font-size:20px}}
+@media(max-width:520px){header{padding:16px}.header-actions{width:100%;margin-left:0}.header-actions .btn{flex:1}.stats{grid-template-columns:repeat(3,1fr)}.welcome h1{font-size:22px}.form-row{grid-template-columns:1fr}.template{min-height:175px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">UCAL <small>CENTRO DE ATENCIÓN</small></div>
+  <div class="search"><span>⌕</span><input id="search" type="search" placeholder="Buscar plantillas por título o contenido..."></div>
+  <div class="header-actions">
+    <button class="btn btn-ghost" id="exportBtn">↓ Exportar</button>
+    <button class="btn btn-light" id="newBtn">＋ Nueva plantilla</button>
+  </div>
+</header>
+<main>
+  <aside class="sidebar">
+    <div class="side-title">Biblioteca</div>
+    <nav>
+      <button class="nav-item active" data-filter="all">▦ Todas las plantillas <span class="nav-count" id="allCount">0</span></button>
+      <button class="nav-item" data-filter="favorites">☆ Favoritas <span class="nav-count" id="favCount">0</span></button>
+      <button class="nav-item" data-filter="recent">◷ Agregadas recientemente</button>
+    </nav>
+    <div class="categories">
+      <div class="side-title">Categorías</div>
+      <div id="categoryList"></div>
+    </div>
+  </aside>
+  <section class="content">
+    <div class="welcome">
+      <div><div class="eyebrow">Herramienta de trabajo</div><h1 id="heading">Todas las plantillas</h1><p>Respuestas organizadas para agilizar tu atención a los estudiantes de UCAL.</p></div>
+      <button class="btn btn-blue" id="newBtn2">＋ Registrar plantilla</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><strong id="totalStat">0</strong><span>Plantillas registradas</span></div>
+      <div class="stat"><strong id="categoryStat">0</strong><span>Categorías</span></div>
+      <div class="stat"><strong id="favoriteStat">0</strong><span>Favoritas</span></div>
+    </div>
+    <div class="toolbar">
+      <select id="categoryFilter"><option value="all">Todas las categorías</option></select>
+      <select id="sortFilter"><option value="updated">Últimas agregadas</option><option value="az">Nombre: A - Z</option><option value="za">Nombre: Z - A</option></select>
+      <span class="result" id="resultCount"></span>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+</main>
+<footer>UCAL · Centro personal de plantillas de atención · Los cambios se guardan en este navegador</footer>
+<div class="overlay" id="editorOverlay">
+  <div class="modal">
+    <h2 id="modalTitle">Registrar nueva plantilla</h2>
+    <p class="sub">Completa los datos. El contenido se conservará tal como lo escribas.</p>
+    <form id="templateForm">
+      <input type="hidden" id="templateId">
+      <div class="field"><label for="title">Nombre de la plantilla *</label><input id="title" required maxlength="90" placeholder="Ej. Consulta sobre estado de matrícula"></div>
+      <div class="form-row">
+        <div class="field"><label for="category">Categoría *</label><input id="category" required list="categoryOptions" placeholder="Ej. Matrícula"><datalist id="categoryOptions"></datalist></div>
+        <div class="field"><label for="channel">Canal de atención</label><select id="channel"><option value="Todos">Todos</option><option value="Llamada">Llamada</option><option value="WhatsApp">WhatsApp</option><option value="Correo">Correo</option><option value="Presencial">Presencial</option></select></div>
+      </div>
+      <div class="field"><label for="content">Contenido de la plantilla *</label><textarea id="content" required placeholder="Escribe aquí el speech o texto que utilizarás..."></textarea></div>
+      <div class="modal-actions"><button type="button" class="btn btn-cancel" id="cancelBtn">Cancelar</button><button type="submit" class="btn btn-blue">Guardar plantilla</button></div>
+    </form>
+  </div>
+</div>
+<div class="overlay" id="viewOverlay">
+  <div class="modal">
+    <h2 id="viewTitle"></h2><p class="sub" id="viewMeta"></p>
+    <div class="field"><textarea id="viewContent" readonly></textarea></div>
+    <div class="modal-actions"><button class="btn btn-cancel" id="closeView">Cerrar</button><button class="btn btn-blue" id="copyView">Copiar contenido</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+(() => {
+  const STORAGE_KEY = "ucal_attention_templates_v1";
+  const seed = [
+    {id:"demo-1",title:"Ejemplo de plantilla",category:"General",channel:"Todos",content:"Esta es una plantilla de ejemplo. Puedes editarla o eliminarla y registrar tus propios speechs oficiales de UCAL.",favorite:false,createdAt:Date.now(),updatedAt:Date.now()}
+  ];
+  let templates = load();
+  let activeFilter = "all";
+  let activeCategory = "all";
+  const $ = id => document.getElementById(id);
+  function load(){
+    try{const saved=localStorage.getItem(STORAGE_KEY);return saved?JSON.parse(saved):seed}
+    catch(e){return seed}
+  }
+  function persist(){localStorage.setItem(STORAGE_KEY,JSON.stringify(templates));renderStats()}
+  function toast(message){const t=$("toast");t.textContent=message;t.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove("show"),2200)}
+  function escapeHtml(value){return String(value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+  function categories(){return [...new Set(templates.map(t=>t.category.trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"))}
+  function renderCategories(){
+    const cats=categories();
+    $("categoryList").innerHTML=cats.map(c=>'<div class="cat-item '+(activeCategory===c?'active':'')+'" data-category="'+escapeHtml(c)+'"><span class="dot"></span>'+escapeHtml(c)+'<span class="nav-count">'+templates.filter(t=>t.category===c).length+'</span></div>').join("")||'<div style="padding:8px 10px;color:#9aa6b5;font-size:12px">Aún no hay categorías</div>';
+    $("categoryFilter").innerHTML='<option value="all">Todas las categorías</option>'+cats.map(c=>'<option value="'+escapeHtml(c)+'">'+escapeHtml(c)+'</option>').join("");
+    $("categoryFilter").value=activeCategory;
+    $("categoryOptions").innerHTML=cats.map(c=>'<option value="'+escapeHtml(c)+'"></option>').join("");
+  }
+  function renderStats(){
+    $("allCount").textContent=templates.length;$("favCount").textContent=templates.filter(t=>t.favorite).length;
+    $("totalStat").textContent=templates.length;$("categoryStat").textContent=categories().length;$("favoriteStat").textContent=templates.filter(t=>t.favorite).length;
+  }
+  function visibleTemplates(){
+    const q=$("search").value.trim().toLocaleLowerCase("es");
+    let list=[...templates];
+    if(activeFilter==="favorites")list=list.filter(t=>t.favorite);
+    if(activeFilter==="recent")list=list.sort((a,b)=>b.createdAt-a.createdAt).slice(0,12);
+    if(activeCategory!=="all")list=list.filter(t=>t.category===activeCategory);
+    if(q)list=list.filter(t=>(t.title+" "+t.category+" "+t.channel+" "+t.content).toLocaleLowerCase("es").includes(q));
+    const sort=$("sortFilter").value;
+    if(sort==="az")list.sort((a,b)=>a.title.localeCompare(b.title,"es"));
+    if(sort==="za")list.sort((a,b)=>b.title.localeCompare(a.title,"es"));
+    if(sort==="updated")list.sort((a,b)=>b.updatedAt-a.updatedAt);
+    return list;
+  }
+  function render(){
+    renderCategories();renderStats();
+    const list=visibleTemplates();
+    $("resultCount").textContent=list.length+" resultado(s)";
+    $("grid").innerHTML=list.length?list.map(t=>'<article class="template"><div class="template-top"><div class="template-icon">▤</div><h3>'+escapeHtml(t.title)+'</h3><span class="tag">'+escapeHtml(t.category)+'</span></div><p>'+escapeHtml(t.content)+'</p><div class="template-actions"><button class="copy" data-action="copy" data-id="'+t.id+'">Copiar texto</button><button data-action="view" data-id="'+t.id+'" title="Ver completa">Ver</button><button data-action="favorite" data-id="'+t.id+'" title="Favorita">'+(t.favorite?"★":"☆")+'</button><button data-action="edit" data-id="'+t.id+'" title="Editar">✎</button><button data-action="delete" data-id="'+t.id+'" title="Eliminar">×</button></div></article>').join(""):'<div class="empty"><div style="font-size:30px;margin-bottom:8px">▤</div><strong>No se encontraron plantillas</strong><p style="font-size:13px">Registra una nueva plantilla o modifica los filtros de búsqueda.</p><button class="btn btn-blue" id="emptyNew">＋ Crear plantilla</button></div>';
+    const emptyNew=$("emptyNew");if(emptyNew)emptyNew.addEventListener("click",()=>openEditor());
+    document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.filter===activeFilter));
+  }
+  function openEditor(t=null){
+    $("templateForm").reset();$("templateId").value=t?.id||"";
+    $("modalTitle").textContent=t?"Editar plantilla":"Registrar nueva plantilla";
+    $("title").value=t?.title||"";$("category").value=t?.category||"";
+    $("channel").value=t?.channel||"Todos";$("content").value=t?.content||"";
+    $("editorOverlay").style.display="flex";$("title").focus();
+  }
+  function closeEditor(){$("editorOverlay").style.display="none"}
+  async function copyText(text){
+    try{await navigator.clipboard.writeText(text);toast("Texto copiado")}
+    catch(e){const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();toast("Texto copiado")}
+  }
+  $("templateForm").addEventListener("submit",e=>{
+    e.preventDefault();
+    const id=$("templateId").value;
+    const existing=templates.find(t=>t.id===id);
+    const item={id:id||("t-"+Date.now()+"-"+Math.random().toString(36).slice(2,7)),title:$("title").value.trim(),category:$("category").value.trim(),channel:$("channel").value,content:$("content").value.trim(),favorite:existing?.favorite||false,createdAt:existing?.createdAt||Date.now(),updatedAt:Date.now()};
+    if(!item.title||!item.category||!item.content){toast("Completa los campos obligatorios");return}
+    if(existing)templates=templates.map(t=>t.id===id?item:t);else templates.push(item);
+    persist();closeEditor();render();toast(existing?"Plantilla actualizada":"Plantilla registrada");
+  });
+  $("grid").addEventListener("click",e=>{
+    const b=e.target.closest("button[data-action]");if(!b)return;
+    const t=templates.find(x=>x.id===b.dataset.id);if(!t)return;
+    switch(b.dataset.action){
+      case "copy":copyText(t.content);break;
+      case "edit":openEditor(t);break;
+      case "view":$("viewTitle").textContent=t.title;$("viewMeta").textContent=t.category+" · "+t.channel;$("viewContent").value=t.content;$("viewOverlay").style.display="flex";$("copyView").dataset.id=t.id;break;
+      case "favorite":t.favorite=!t.favorite;t.updatedAt=Date.now();persist();render();toast(t.favorite?"Añadida a favoritas":"Quitada de favoritas");break;
+      case "delete":if(confirm('¿Eliminar la plantilla "'+t.title+'"?')){templates=templates.filter(x=>x.id!==t.id);persist();render();toast("Plantilla eliminada")}break;
+    }
+  });
+  document.querySelectorAll(".nav-item").forEach(b=>b.addEventListener("click",()=>{activeFilter=b.dataset.filter;activeCategory="all";render();$("heading").textContent=activeFilter==="favorites"?"Favoritas":activeFilter==="recent"?"Agregadas recientemente":"Todas las plantillas"}));
+  $("categoryList").addEventListener("click",e=>{const c=e.target.closest("[data-category]");if(!c)return;activeCategory=c.dataset.category;activeFilter="all";$("heading").textContent=activeCategory;render()});
+  $("search").addEventListener("input",render);
+  $("categoryFilter").addEventListener("change",e=>{activeCategory=e.target.value;render()});
+  $("sortFilter").addEventListener("change",render);
+  $("newBtn").addEventListener("click",()=>openEditor());$("newBtn2").addEventListener("click",()=>openEditor());
+  $("cancelBtn").addEventListener("click",closeEditor);
+  $("editorOverlay").addEventListener("click",e=>{if(e.target===$("editorOverlay"))closeEditor()});
+  $("closeView").addEventListener("click",()=>$("viewOverlay").style.display="none");
+  $("viewOverlay").addEventListener("click",e=>{if(e.target===$("viewOverlay"))$("viewOverlay").style.display="none"});
+  $("copyView").addEventListener("click",()=>{const t=templates.find(x=>x.id===$("copyView").dataset.id);if(t)copyText(t.content)});
+  $("exportBtn").addEventListener("click",()=>{
+    const blob=new Blob([JSON.stringify(templates,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="plantillas-ucal.json";a.click();URL.revokeObjectURL(url);toast("Copia de seguridad descargada");
+  });
+  window.addEventListener("keydown",e=>{
+    if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="f"){e.preventDefault();$("search").focus()}
+    if(e.key==="Escape"){closeEditor();$("viewOverlay").style.display="none";$("search").value="";render()}
+  });
+  render();
+})();
+</script>
+</body>
+</html>
