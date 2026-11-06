@@ -150,6 +150,13 @@ body.editing .new-template{display:grid}
           <label for="templateContent">Texto para copiar</label>
           <textarea id="templateContent" required autofocus placeholder="Escribe o pega aquí tu respuesta..."></textarea>
         </div>
+        <div class="field">
+          <div class="color-label">
+            <label style="margin:0">Color de la tarjeta</label>
+            <span class="hint" id="selectedColorName">Azul</span>
+          </div>
+          <div class="palette" id="colorPalette" aria-label="Elegir color de tarjeta"></div>
+        </div>
       </div>
       <div class="modal-footer">
         <span class="hint">El texto se copiará exactamente como lo escribas.</span>
@@ -226,6 +233,13 @@ body.editing .new-template{display:grid}
       return false;
     }
   }
+  function renderPalette(){
+    $("colorPalette").innerHTML = colors.map(color =>
+      '<button type="button" class="swatch '+(selectedColor===color.id?"selected":"")+'" data-color="'+color.id+'" title="'+color.name+'" aria-label="Elegir color '+color.name+'" aria-pressed="'+(selectedColor===color.id)+'" style="background:'+color.bg+'"></button>'
+    ).join("");
+    const selected = colors.find(color => color.id === selectedColor);
+    $("selectedColorName").textContent = selected ? selected.name : "Azul";
+  }
   function showToast(message){
     const element = $("toast");
     element.textContent = message;
@@ -277,7 +291,8 @@ body.editing .new-template{display:grid}
     $("templateId").value = item ? item.id : "";
     $("modalTitle").textContent = item ? "Editar texto" : "Añadir texto";
     $("templateContent").value = item ? item.content : "";
-    selectedColor = item ? item.color : colors[templates.length % colors.length].id;
+    selectedColor = item ? (colors.some(color => color.id === item.color) ? item.color : "c-blue") : colors[templates.length % colors.length].id;
+    renderPalette();
     $("editorOverlay").classList.add("open");
     setTimeout(()=>$("templateContent").focus(),30);
   }
@@ -305,6 +320,12 @@ body.editing .new-template{display:grid}
     showToast("Copia de seguridad descargada.");
   }
 
+  $("colorPalette").addEventListener("click",event=>{
+    const swatch = event.target.closest("[data-color]");
+    if(!swatch) return;
+    selectedColor = swatch.dataset.color;
+    renderPalette();
+  });
   $("editBtn").addEventListener("click",()=>setEditing(!editing));
   $("newBtn").addEventListener("click",()=>{if(editing)openEditor();});
   $("saveBtn").addEventListener("click",()=>saveData(true));
