@@ -52,8 +52,14 @@ main{flex:1;min-height:0;overflow:auto;padding:12px 18px 30px}
 body.editing .card-actions{display:flex}
 .card-tool{width:24px;height:24px;border:0;border-radius:50%;background:#ffffffdd;color:#34434b;box-shadow:0 1px 4px #00000020;display:grid;place-items:center;font-size:12px}
 .card-tool:hover{background:#fff;transform:scale(1.08)}
-.card.dragging{opacity:.4;transform:scale(.98)}
-.card.drag-over{outline:2px dashed #2386b7;outline-offset:2px}
+.card.dragging{opacity:.35;transform:scale(.98);cursor:grabbing}
+body.editing .card{cursor:grab}
+body.editing .card:active{cursor:grabbing}
+.card.drop-before{position:relative}
+.card.drop-before::before{content:"";position:absolute;left:8px;right:8px;top:3px;height:4px;border-radius:5px;background:#1684b7;box-shadow:0 0 0 2px #ffffffaa;z-index:4}
+.card.drop-after{position:relative}
+.card.drop-after::after{content:"";position:absolute;left:8px;right:8px;bottom:3px;height:4px;border-radius:5px;background:#1684b7;box-shadow:0 0 0 2px #ffffffaa;z-index:4}
+.dashboard-grid.grid-drop-end{outline:2px dashed #1684b7;outline-offset:-5px;border-radius:12px}
 .c-blue{background:linear-gradient(135deg,#e2f1ff,#bfdef9);color:#1457a3}
 .c-green{background:linear-gradient(135deg,#e8f7e9,#c8e7cb);color:#236b32}
 .c-purple{background:linear-gradient(135deg,#f2e4f6,#e2c6eb);color:#63309b}
@@ -195,6 +201,8 @@ body.editing .new-template{display:grid}
   let editing = false;
   let selectedColor = "c-blue";
   let draggedId = null;
+  let didReorder = false;
+  let suppressCardClickUntil = 0;
   let toastTimer = null;
 
   function loadTemplates(){
@@ -358,6 +366,11 @@ body.editing .new-template{display:grid}
     if(saveData(false)){closeEditor();render();showToast(previous?"Plantilla actualizada.":"Plantilla agregada.");}
   });
   $("grid").addEventListener("click",event=>{
+    if(Date.now() < suppressCardClickUntil) {
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
     const tool=event.target.closest("[data-action]");
     const card=event.target.closest(".card");
     if(tool){
@@ -391,32 +404,73 @@ body.editing .new-template{display:grid}
     const card=event.target.closest(".card");
     if(!editing || !card){event.preventDefault();return;}
     draggedId=card.dataset.id;
+    didReorder=false;
     card.classList.add("dragging");
-    event.dataTransfer.effectAllowed="move";
+    if(event.dataTransfer){
+      event.dataTransfer.effectAllowed="move";
+      event.dataTransfer.setData("text/plain",draggedId);
+      try{event.dataTransfer.setDragImage(card,Math.min(40,card.offsetWidth/2),Math.min(30,card.offsetHeight/2));}catch(error){}
+    }
   });
   $("grid").addEventListener("dragover",event=>{
-    if(!editing)return;
-    const target=event.target.closest(".card");
-    if(!target || target.dataset.id===draggedId)return;
+    if(!editing || !draggedId)return;
     event.preventDefault();
-    document.querySelectorAll(".card.drag-over").forEach(item=>item.classList.remove("drag-over"));
-    target.classList.add("drag-over");
+    if(event.dataTransfer)event.dataTransfer.dropEffect="move";
+    const target=event.target.closest(".card");
+    document.querySelectorAll(".card.drop-before,.card.drop-after").forEach(item=>{
+      item.classList.remove("drop-before","drop-after");
+    });
+    $("grid").classList.remove("grid-drop-end");
+    if(!target || target.dataset.id===draggedId){
+      if(!target)$("grid").classList.add("grid-drop-end");
+      return;
+    }
+    const rect=target.getBoundingClientRect();
+    const after=event.clientY>rect.top+(rect.height/2);
+    target.classList.add(after?"drop-after":"drop-before");
+  });
+  $("grid").addEventListener("dragleave",event=>{
+    if(event.relatedTarget && $("grid").contains(event.relatedTarget))return;
+    $("grid").classList.remove("grid-drop-end");
+    document.querySelectorAll(".card.drop-before,.card.drop-after").forEach(item=>{
+      item.classList.remove("drop-before","drop-after");
+    });
   });
   $("grid").addEventListener("drop",event=>{
     if(!editing || !draggedId)return;
-    const target=event.target.closest(".card");
-    if(!target || target.dataset.id===draggedId)return;
     event.preventDefault();
+    const target=event.target.closest(".card");
     const from=templates.findIndex(item=>item.id===draggedId);
-    const to=templates.findIndex(item=>item.id===target.dataset.id);
-    if(from<0||to<0)return;
+    if(from<0)return;
+    let insertAt=templates.length;
+    if(target && target.dataset.id!==draggedId){
+      const targetIndex=templates.findIndex(item=>item.id===target.dataset.id);
+      if(targetIndex<0)return;
+      const rect=target.getBoundingClientRect();
+      const after=event.clientY>rect.top+(rect.height/2);
+      insertAt=targetIndex;
+      if(from<targetIndex)insertAt--;
+      if(after)insertAt++;
+    }else if(target && target.dataset.id===draggedId){
+      $("grid").classList.remove("grid-drop-end");
+      return;
+    }
     const moved=templates.splice(from,1)[0];
-    templates.splice(to,0,moved);
-    saveData(false);render();showToast("Orden de tarjetas actualizado.");
+    insertAt=Math.max(0,Math.min(insertAt,templates.length));
+    templates.splice(insertAt,0,moved);
+    didReorder=true;
+    saveData(false);
+    render();
+    showToast("Casilla reubicada correctamente.");
   });
   $("grid").addEventListener("dragend",()=>{
+    if(didReorder)suppressCardClickUntil=Date.now()+500;
     draggedId=null;
-    document.querySelectorAll(".card.dragging,.card.drag-over").forEach(item=>item.classList.remove("dragging","drag-over"));
+    didReorder=false;
+    $("grid").classList.remove("grid-drop-end");
+    document.querySelectorAll(".card.dragging,.card.drop-before,.card.drop-after").forEach(item=>{
+      item.classList.remove("dragging","drop-before","drop-after");
+    });
   });
   window.addEventListener("keydown",event=>{
     if((event.ctrlKey||event.metaKey) && event.key.toLowerCase()==="f"){
